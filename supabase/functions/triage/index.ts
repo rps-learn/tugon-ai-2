@@ -276,7 +276,7 @@ Deno.serve(async (req) => {
   if (triage.category && lat !== null && lng !== null) {
     const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     const { data: dup } = await db.from("incidents").select("id")
-      .eq("category", triage.category).is("cluster_id", null).neq("id", id).gte("created_at", since)
+      .eq("category", triage.category).is("cluster_id", null).neq("id", id).neq("status", "resolved").gte("created_at", since)
       .gte("lat", lat - 0.001).lte("lat", lat + 0.001).gte("lng", lng - 0.001).lte("lng", lng + 0.001)
       .order("created_at", { ascending: true }).limit(1);
     clusterId = dup?.[0]?.id ?? null;

@@ -20,9 +20,13 @@ export default function ConsolePage() {
   const reviewCount = incidents.filter((i) => i.needs_review).length
 
   const { list, dupCount, mapPoints } = useMemo(() => {
+    const shown = incidents.filter((i) => !i.needs_review && (showResolved || i.status !== 'resolved'))
+    const parents = new Set(shown.filter((i) => !i.cluster_id).map((i) => i.id))
+    // A duplicate is folded into its parent only while that parent is on screen.
+    // Otherwise it stands alone, so a new emergency can never be hidden behind a resolved one.
+    const open = shown.filter((i) => !i.cluster_id || !parents.has(i.cluster_id))
     const dup = new Map<string, number>()
-    incidents.forEach((i) => i.cluster_id && dup.set(i.cluster_id, (dup.get(i.cluster_id) ?? 0) + 1))
-    const open = incidents.filter((i) => !i.needs_review && (showResolved || i.status !== 'resolved') && !i.cluster_id)
+    shown.forEach((i) => { if (i.cluster_id && parents.has(i.cluster_id)) dup.set(i.cluster_id, (dup.get(i.cluster_id) ?? 0) + 1) })
     open.sort((a, b) => (a.severity ?? 'P9').localeCompare(b.severity ?? 'P9') || b.created_at.localeCompare(a.created_at))
     return {
       list: open.slice(0, 100),
