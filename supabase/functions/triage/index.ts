@@ -93,17 +93,9 @@ type Triage = {
   severity: string; confidence: number; urgency_note: string;
 };
 
-async function classify(description: string, imageB64: string | null, inProgress: boolean, purok: string): Promise<Triage> {
-  const key = Deno.env.get("GEMINI_API_KEY");
-  if (!key) throw new Error("GEMINI_API_KEY not set");
-  const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
-  const parts: unknown[] = [{
-    text: `in_progress: ${inProgress}\nlocation: ${purok || "not provided"}\ntext: ${description || "(none)"}`,
-  }];
-  if (imageB64) parts.push({ inline_data: { mime_type: "image/jpeg", data: imageB64 } });
-
+async function callGemini(model: string, key: string, parts: unknown[], timeoutMs: number): Promise<Record<string, unknown>> {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 25000);
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
@@ -118,14 +110,47 @@ async function classify(description: string, imageB64: string | null, inProgress
         }),
       },
     );
-    if (!res.ok) throw new Error(`Gemini ${res.status}`);
+    if (!res.ok) {
+      const err = new Error(`Gemini ${res.status} (${model}): ${(await res.text()).replace(/\s+/g, " ").slice(0, 140)}`) as Error & { status?: number };
+      err.status = res.status;
+      throw err;
+    }
     const data = await res.json();
     const text = data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? "").join("") ?? "";
-    const raw = JSON.parse(text.replace(/^```json\s*|```$/g, "").trim());
-    return normalize(raw, inProgress);
+    return JSON.parse(text.replace(/^```json\s*|```$/g, "").trim());
   } finally {
     clearTimeout(timer);
   }
+}
+
+// Free-tier Gemini models return 503 "high demand" in bursts, so retry once, then try a fallback model.
+async function classify(description: string, imageB64: string | null, inProgress: boolean, purok: string): Promise<Triage> {
+  const key = Deno.env.get("GEMINI_API_KEY");
+  if (!key) throw new Error("GEMINI_API_KEY not set");
+  const models = [
+    Deno.env.get("GEMINI_MODEL") ?? "gemini-flash-latest",
+    Deno.env.get("GEMINI_FALLBACK_MODEL") ?? "gemini-flash-lite-latest",
+  ];
+  const parts: unknown[] = [{
+    text: `in_progress: ${inProgress}\nlocation: ${purok || "not provided"}\ntext: ${description || "(none)"}`,
+  }];
+  if (imageB64) parts.push({ inline_data: { mime_type: "image/jpeg", data: imageB64 } });
+
+  let lastErr: unknown = new Error("no model available");
+  for (const model of models) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        return normalize(await callGemini(model, key, parts, 12000), inProgress);
+      } catch (e) {
+        lastErr = e;
+        const status = (e as { status?: number }).status;
+        const retryable = status === undefined || status === 429 || status >= 500;
+        if (!retryable) break; // e.g. 404 bad model name: skip to the next model
+        await new Promise((r) => setTimeout(r, 800));
+      }
+    }
+  }
+  throw lastErr;
 }
 
 // Enforce the output contract and the in_progress <-> severity rule server-side.
@@ -210,7 +235,7 @@ Deno.serve(async (req) => {
     triage = {
       category: null, subcategory: "unclassified", primary_agency: "official", secondary_agency: null,
       severity: inProgress ? "P2" : "P3", confidence: 0,
-      urgency_note: "AI unavailable - needs manual routing",
+      urgency_note: `AI unavailable - needs manual routing (${e instanceof Error ? e.message.slice(0, 200) : "unknown error"})`,
     };
   }
 

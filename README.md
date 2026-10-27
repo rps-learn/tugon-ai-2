@@ -6,6 +6,7 @@ AI-assisted barangay incident reporting and routing for Barangay Mambaling and B
 
 - [Setup guide](docs/SETUP.md): accounts, keys, env vars, Vercel deploy, free-tier limits
 - [User guide](docs/USER_GUIDE.md): citizen, Barangay Official, BFP / ERUF / Police
+- [Demo script](docs/DEMO_SCRIPT.md): sample scenario, test data, defense flow and likely panel questions
 
 ## Quick start
 

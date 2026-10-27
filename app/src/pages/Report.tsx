@@ -33,6 +33,8 @@ export default function ReportPage() {
   const [outcome, setOutcome] = useState<SubmitOutcome | null>(null)
   const [sosOpen, setSosOpen] = useState(false)
   const sosFile = useRef<HTMLInputElement>(null)
+  const camRef = useRef<HTMLInputElement>(null)
+  const uploadRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!navigator.geolocation) { setLocState('fail'); return }
@@ -53,6 +55,11 @@ export default function ReportPage() {
   async function send(opts: { file: File | null; description: string; inProgress: boolean; anonymous: boolean; purok: string }) {
     setBusy(true); setError('')
     const image = opts.file ? await compressImage(opts.file) : null
+    if (opts.file && !image) {
+      setBusy(false)
+      setError(t('photo_error'))
+      return
+    }
     const out = await submitReport({
       client_id: newClientId(),
       description: opts.description,
@@ -115,11 +122,18 @@ export default function ReportPage() {
       <form className="card stack" onSubmit={onSubmit}>
         <h2>{t('report_title')}</h2>
 
-        <label className="photo">
-          {preview ? <img src={preview} alt="" /> : <span>📷</span>}
-          <span className="btn secondary">{file ? t('photo_change') : t('photo_add')}</span>
-          <input type="file" accept="image/*" capture="environment" hidden onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-        </label>
+        <div className="photo">
+          {preview ? <img src={preview} alt="" /> : <span className="photo-icon">📷</span>}
+          <div className="row wrap">
+            <button type="button" className="btn secondary" onClick={() => camRef.current?.click()}>📷 {t('photo_take')}</button>
+            <button type="button" className="btn secondary" onClick={() => uploadRef.current?.click()}>🖼️ {t('photo_upload')}</button>
+            {file && <button type="button" className="btn secondary" onClick={() => setFile(null)}>✕ {t('photo_remove')}</button>}
+          </div>
+          <input ref={camRef} type="file" accept="image/*" capture="environment" hidden
+            onChange={(e) => { setFile(e.target.files?.[0] ?? null); e.target.value = '' }} />
+          <input ref={uploadRef} type="file" accept="image/*" hidden
+            onChange={(e) => { setFile(e.target.files?.[0] ?? null); e.target.value = '' }} />
+        </div>
 
         <label>{t('desc_label')}
           <textarea rows={3} value={desc} maxLength={2000} placeholder={t('desc_ph')} onChange={(e) => setDesc(e.target.value)} />

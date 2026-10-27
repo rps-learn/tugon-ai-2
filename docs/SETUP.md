@@ -66,6 +66,18 @@ Variables starting with `VITE_` are bundled into the public website. Never give 
 
 Until the secret is set, reports still work, but every report is sent to the Barangay Official's review queue for manual routing.
 
+### Choosing the Gemini model
+Google retires and renames Gemini models often, and some are closed to new accounts (for example `gemini-2.5-flash` returned a 404 "no longer available to new users" for this project). The function therefore uses these defaults:
+
+| Secret (optional) | Default | Purpose |
+|---|---|---|
+| `GEMINI_MODEL` | `gemini-flash-latest` | Main model. This alias always points to the current Flash model. |
+| `GEMINI_FALLBACK_MODEL` | `gemini-flash-lite-latest` | Used if the main model is busy or unavailable. |
+
+The function retries once on temporary errors (503 "high demand", 429, timeouts), then tries the fallback model. If a model name stops working, set `GEMINI_MODEL` to a current Flash model name from AI Studio. No redeploy is needed.
+
+If AI classification fails, the reason is written into the report's **AI note** (visible in the Official's Review tab), for example `Gemini 404 (...)`.
+
 ## 5. Supabase setup
 
 The existing project is **tugon ai 2** (ref `amalxkwwytrlxbxekvxw`) and is already set up. To recreate it from scratch, for example for another group:
@@ -146,7 +158,7 @@ Valid roles: `citizen`, `official`, `bfp`, `eruf`, `police`.
 
 | Problem | Likely cause and fix |
 |---|---|
-| Every report says "A barangay official is reviewing it" | `GEMINI_API_KEY` is missing in Supabase secrets, the key is invalid, or the free quota is used up. Check Edge Functions, `triage`, Logs. |
+| Every report says "A barangay official is reviewing it" | Open the report in the Official's **Review** tab and read the **AI note**. `GEMINI_API_KEY not set` means the Supabase secret is missing. `Gemini 400/403` means a bad key. `Gemini 404` means the model name is retired, so set `GEMINI_MODEL`. `Gemini 429/503` means free-tier limits or high demand: wait and retry. |
 | Sign-in fails for a new citizen | Email confirmation is still on, so confirm the email or disable it (section 5). |
 | Page is blank after deploy | Environment variables missing in Vercel. Add them and redeploy. |
 | Refreshing `/console` gives a 404 | Root Directory is not `app`, so `vercel.json` is not being used. |
