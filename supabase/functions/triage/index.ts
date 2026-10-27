@@ -1,6 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
+declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
+
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -175,6 +177,25 @@ function normalize(raw: Record<string, unknown>, inProgress: boolean): Triage {
   };
 }
 
+// Free reverse geocoding via OpenStreetMap Nominatim (usage policy: identify the app, max ~1 request/second).
+async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 4000);
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&lat=${lat}&lon=${lng}`,
+      { signal: ctrl.signal, headers: { "User-Agent": "TUGON-AI-student-project/1.0", "Accept-Language": "en" } },
+    );
+    if (!res.ok) return null;
+    const d = await res.json();
+    return typeof d.display_name === "string" ? d.display_name.slice(0, 250) : null;
+  } catch {
+    return null; // address is a convenience; never block a report on it
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
@@ -186,6 +207,8 @@ Deno.serve(async (req) => {
   const imageB64 = typeof body.image_base64 === "string" && body.image_base64.length < 2_500_000 ? body.image_base64 : null;
   const inProgress = body.in_progress === true;
   const purok = String(body.purok ?? "").slice(0, 80);
+  const landmark = String(body.landmark ?? "").slice(0, 160);
+  const clientAddress = String(body.address ?? "").replace(/\s+/g, " ").slice(0, 250);
   const lat = typeof body.lat === "number" ? body.lat : null;
   const lng = typeof body.lng === "number" ? body.lng : null;
   const clientId = typeof body.client_id === "string" ? body.client_id.slice(0, 64) : null;
@@ -198,7 +221,7 @@ Deno.serve(async (req) => {
   if (clientId) {
     const { data: existing } = await db.from("incidents")
       .select("id,category,severity,status,needs_review,primary_agency").eq("client_id", clientId).maybeSingle();
-    if (existing) return json(existing);
+    if (existing) return json({ ...existing, pending: existing.status === "submitted" });
   }
 
   let reporterId: string | null = null;
@@ -209,7 +232,7 @@ Deno.serve(async (req) => {
   }
 
   const { data: row, error: insErr } = await db.from("incidents").insert({
-    client_id: clientId, reporter_id: reporterId, anonymous, description, lat, lng, purok, in_progress: inProgress,
+    client_id: clientId, reporter_id: reporterId, anonymous, description, lat, lng, purok, landmark, in_progress: inProgress,
   }).select("id").single();
   if (insErr || !row) return json({ error: insErr?.message ?? "insert failed" }, 500);
   const id = row.id as string;
@@ -223,6 +246,13 @@ Deno.serve(async (req) => {
       if (!error) photoPath = path;
     } catch (_) { /* photo is optional; continue */ }
   }
+
+  // The slow part (AI, 10-30 s) runs after the response so the citizen is not left waiting.
+  const finish = async () => {
+  // Prefer the address the citizen's phone already looked up; otherwise try from the server.
+  const addressPromise: Promise<string | null> = clientAddress
+    ? Promise.resolve(clientAddress)
+    : lat !== null && lng !== null ? reverseGeocode(lat, lng) : Promise.resolve(null);
 
   let triage: Triage;
   let aiFailed = false;
@@ -239,6 +269,7 @@ Deno.serve(async (req) => {
     };
   }
 
+  const address = await addressPromise;
   const needsReview = triage.confidence < CONFIDENCE_THRESHOLD;
 
   let clusterId: string | null = null;
@@ -253,9 +284,9 @@ Deno.serve(async (req) => {
 
   const status = needsReview ? "classified" : "agency_notified";
   const { error: updErr } = await db.from("incidents").update({
-    ...triage, photo_path: photoPath, needs_review: needsReview, status, cluster_id: clusterId,
+    ...triage, address, photo_path: photoPath, needs_review: needsReview, status, cluster_id: clusterId,
   }).eq("id", id);
-  if (updErr) return json({ error: updErr.message }, 500);
+  if (updErr) { console.error("update failed", updErr.message); return; }
 
   await db.from("incident_events").insert([
     { incident_id: id, actor_id: reporterId, action: "submitted" },
@@ -265,8 +296,8 @@ Deno.serve(async (req) => {
     },
   ]);
 
-  return json({
-    id, category: triage.category, severity: triage.severity, status,
-    needs_review: needsReview, primary_agency: triage.primary_agency,
-  });
+  };
+
+  EdgeRuntime.waitUntil(finish().catch((e) => console.error("background triage crashed", e)));
+  return json({ id, status: "submitted", pending: true });
 });

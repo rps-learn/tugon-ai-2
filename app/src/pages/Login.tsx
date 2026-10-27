@@ -45,23 +45,23 @@ export default function LoginPage() {
   return (
     <div className="stack narrow">
       <form className="card stack" onSubmit={(e) => { e.preventDefault(); go(email, password) }}>
-        <h2>{mode === 'login' ? t('login_title') : t('signup_title')}</h2>
+        <h1>{mode === 'login' ? t('login_title') : t('signup_title')}</h1>
         {mode === 'signup' && (
           <label>{t('full_name')}<input value={name} onChange={(e) => setName(e.target.value)} required /></label>
         )}
         <label>{t('email')}<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" /></label>
         <label>{t('password')}<input type="password" value={password} minLength={6} onChange={(e) => setPassword(e.target.value)} required autoComplete={mode === 'login' ? 'current-password' : 'new-password'} /></label>
-        {msg && <div className="banner err">{msg}</div>}
-        <button className="btn big" disabled={busy}>{mode === 'login' ? t('login') : t('signup')}</button>
+        {msg && <div className="banner err" role="alert">{msg}</div>}
+        <button className="btn big" disabled={busy}>{busy && <span className="spinner" aria-hidden="true" />}{mode === 'login' ? t('login') : t('signup')}</button>
         <button type="button" className="link" onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}>
           {mode === 'login' ? t('to_signup') : t('to_login')}
         </button>
-        <p className="muted small">{t('guest_note')}</p>
+        <p className="muted">{t('guest_note')}</p>
       </form>
 
       {DEMO && mode === 'login' && (
         <div className="card stack">
-          <h3>{t('demo_title')}</h3>
+          <h2>{t('demo_title')}</h2>
           <div className="chips">
             {DEMO_USERS.map(([label, em]) => (
               <button key={em} type="button" className="chip" disabled={busy} onClick={() => go(em, DEMO_PASSWORD)}>{label}</button>

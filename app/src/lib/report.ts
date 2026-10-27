@@ -10,6 +10,8 @@ export interface Draft {
   lat: number | null
   lng: number | null
   purok: string
+  landmark: string
+  address: string
   anonymous: boolean
 }
 
@@ -20,6 +22,7 @@ export interface TriageResult {
   status: string
   needs_review: boolean
   primary_agency: string | null
+  pending?: boolean // true while the AI is still classifying in the background
 }
 
 export type SubmitOutcome =

@@ -66,6 +66,14 @@ Variables starting with `VITE_` are bundled into the public website. Never give 
 
 Until the secret is set, reports still work, but every report is sent to the Barangay Official's review queue for manual routing.
 
+### How a report is processed
+1. The phone sends the report to the `triage` Edge Function.
+2. The function saves it, uploads the photo, and **replies within a couple of seconds** (status `submitted`).
+3. After replying, it classifies with Gemini in the background (5 to 30 s), then updates the report: category, urgency, agencies, address and duplicate grouping.
+4. The citizen's screen polls for the result for up to about 60 seconds. If it never arrives, the report is still saved and a message says it is being processed.
+
+Until step 3 finishes, a report is visible only to the Barangay Official as "Unclassified". Agencies see it once it is routed.
+
 ### Choosing the Gemini model
 Google retires and renames Gemini models often, and some are closed to new accounts (for example `gemini-2.5-flash` returned a 404 "no longer available to new users" for this project). The function therefore uses these defaults:
 

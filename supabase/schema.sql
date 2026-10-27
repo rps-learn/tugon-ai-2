@@ -159,3 +159,6 @@ alter publication supabase_realtime add table public.incidents;
 revoke execute on function public.handle_new_user() from public, anon, authenticated;
 revoke execute on function public.current_role_name() from public, anon;
 grant execute on function public.current_role_name() to authenticated;
+
+-- Readable location: reverse-geocoded address (set by the triage function) and a citizen-typed landmark.
+alter table public.incidents add column if not exists landmark text, add column if not exists address text;

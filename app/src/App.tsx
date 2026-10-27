@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { Navigate, NavLink, Route, Routes, useNavigate } from 'react-router-dom'
+import { Link, Navigate, NavLink, Route, Routes, useNavigate } from 'react-router-dom'
 import { useAuth } from './lib/auth'
 import { LANGS, useI18n, type Lang } from './lib/i18n'
 import { flushQueue, queueSize } from './lib/report'
@@ -7,6 +7,7 @@ import ReportPage from './pages/Report'
 import TrackPage from './pages/Track'
 import LoginPage from './pages/Login'
 import PrivacyPage from './pages/Privacy'
+import NotFound from './pages/NotFound'
 import ConsolePage from './pages/console/Console'
 
 function Header() {
@@ -16,26 +17,37 @@ function Header() {
   const isResponder = profile && profile.role !== 'citizen'
   return (
     <header className="topbar">
-      <div className="brand">TUGON AI <span>{t('tagline')}</span></div>
-      <nav>
-        <NavLink to="/" end>{t('nav_report')}</NavLink>
-        <NavLink to="/track">{t('nav_track')}</NavLink>
-        {isResponder && <NavLink to="/console">{t('nav_console')}</NavLink>}
-        <NavLink to="/privacy">{t('nav_privacy')}</NavLink>
+      <Link to="/" className="brand">TUGON AI <small>{t('tagline')}</small></Link>
+      <nav className="mainnav" aria-label="Main">
+        <NavLink to="/" end><span className="nav-icon" aria-hidden="true">📝</span>{t('nav_report')}</NavLink>
+        <NavLink to="/track"><span className="nav-icon" aria-hidden="true">📋</span>{t('nav_track')}</NavLink>
+        {isResponder && <NavLink to="/console"><span className="nav-icon" aria-hidden="true">🗂️</span>{t('nav_console')}</NavLink>}
       </nav>
       <div className="topbar-right">
         <select aria-label={t('language')} value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
           {LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
         </select>
         {profile ? (
-          <button className="link" onClick={async () => { await signOut(); nav('/') }}>
-            {t('nav_logout')} ({profile.role})
+          <button className="btn ghost" aria-label={`${t('nav_logout')} (${profile.role})`}
+            onClick={async () => { await signOut(); nav('/') }}>
+            {t('nav_logout')}
           </button>
         ) : (
-          <NavLink to="/login">{t('nav_login')}</NavLink>
+          <Link className="btn ghost" to="/login">{t('nav_login')}</Link>
         )}
       </div>
     </header>
+  )
+}
+
+function Footer() {
+  const { t } = useI18n()
+  return (
+    <footer className="footer">
+      <p>{t('disclaimer')}</p>
+      <p><Link to="/privacy">{t('nav_privacy')}</Link></p>
+      <p className="caption">TUGON AI · Barangay Mambaling &amp; Pardo, Cebu City</p>
+    </footer>
   )
 }
 
@@ -56,12 +68,12 @@ function QueueBanner() {
     }
   }, [])
   if (!n) return null
-  return <div className="banner warn">{n} {t('track_queued')}</div>
+  return <div className="banner warn" role="status" style={{ borderRadius: 0 }}>{n} {t('track_queued')}</div>
 }
 
 export function RequireResponder({ children }: { children: ReactNode }) {
   const { profile, loading } = useAuth()
-  if (loading) return <p className="pad">…</p>
+  if (loading) return <p className="loading pad"><span className="spinner" aria-hidden="true" /> Loading…</p>
   if (!profile || profile.role === 'citizen') return <Navigate to="/login" replace />
   return <>{children}</>
 }
@@ -69,18 +81,20 @@ export function RequireResponder({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <>
+      <a className="skip-link" href="#main">Skip to content</a>
       <Header />
       <QueueBanner />
-      <main>
+      <main id="main" tabIndex={-1}>
         <Routes>
           <Route path="/" element={<ReportPage />} />
           <Route path="/track" element={<TrackPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/console" element={<RequireResponder><ConsolePage /></RequireResponder>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+      <Footer />
     </>
   )
 }

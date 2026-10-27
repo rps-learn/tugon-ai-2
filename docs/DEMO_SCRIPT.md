@@ -38,7 +38,7 @@ Having the Official and BFP windows side by side lets the audience see reports a
 6. Type `Purok 3` as the purok. Leave "Report anonymously" unticked.
 7. Tap **Submit report**.
 
-**Expected:** a big **P1** circle and "Help is on the way".
+**Expected:** within about 2 seconds, "Report received. Checking how urgent it is…" with a ⏳. A few seconds later (5 to 30, depending on how busy Gemini is) it changes to a big **P1** circle and "Help is on the way". Explain this to the panel: the report is saved instantly and the AI classifies in the background, so slow AI never delays an emergency report.
 **AI result (typical):** category fire, severity P1, primary agency BFP, secondary ERUF (a child is trapped).
 
 ### Step 2: The agencies receive it (laptop)

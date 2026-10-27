@@ -35,8 +35,8 @@ You do not need an account to report.
 2. Tap **Add photo** (camera) if you can do so safely.
 3. Describe what happened in English, Bisaya or Tagalog. Optionally tap a type chip (Fire, Medical, Disaster, Crime, Disturbance, Other).
 4. Answer **Is it happening right now?** This is required, because it decides how urgent the report is.
-5. Optionally enter your Purok or Sitio. Tick **Report anonymously** for sensitive issues such as domestic violence.
-6. Tap **Submit report**. You will see a confirmation message.
+5. Optionally enter your Purok or Sitio and a **landmark** (for example "near the basketball court"). A readable address for your pin appears under the map so you can check it. Tick **Report anonymously** for sensitive issues such as domestic violence.
+6. Tap **Submit report**. Within a couple of seconds you see "Report received. Checking how urgent it is…" with a ⏳ icon. After a few more seconds (usually 5 to 30) the AI finishes and the message updates to the urgency result, for example "Help is on the way". Your report is already saved and visible to the barangay while the AI works, so you can leave the screen safely.
 
 ### Emergency SOS
 Tap the big red **SOS** button. Choose **Take a photo** or **Send SOS now**. It sends your location marked as happening now. Add details by also sending a normal report if you can.
@@ -85,7 +85,7 @@ Every re-route is logged.
 Sign in with your agency account, then open **Console**. You see **only** reports routed to your agency, as primary or secondary. For example, a fire with possible casualties appears for both BFP and ERUF.
 
 ### Handle an incident
-1. Tap a card to open it: description, photo, AI note and location pin.
+1. Tap a card to open it: description, photo, AI note and location. The map jumps to the incident, and the card shows the **landmark**, an approximate **address**, the coordinates, an **Open in Google Maps** link for navigation, and a **Show on map** link. Reports without GPS show a "No GPS location" warning, so ask the reporter for details.
 2. Press the next status button as work progresses:
    - **Acknowledge**, then **En route**, then **On scene**, then **Resolve** (you can add resolution notes).
 3. Response times are calculated automatically: report to acknowledgement, and report to resolution. These feed the Analytics tab.

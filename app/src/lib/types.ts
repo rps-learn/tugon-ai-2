@@ -15,6 +15,8 @@ export interface Incident {
   lat: number | null
   lng: number | null
   purok: string | null
+  landmark: string | null
+  address: string | null
   in_progress: boolean
   category: string | null
   subcategory: string | null
@@ -57,8 +59,12 @@ export const CATEGORY_LABEL: Record<string, string> = {
   social_general: 'Social / General',
 }
 
+// Badge backgrounds checked for contrast against SEVERITY_TEXT (WCAG AA). Meaning is also carried by the P1-P4 text.
 export const SEVERITY_COLOR: Record<Severity, string> = {
-  P1: '#c62828', P2: '#ef6c00', P3: '#f9a825', P4: '#607d8b',
+  P1: '#c62828', P2: '#b45309', P3: '#f9a825', P4: '#546e7a',
+}
+export const SEVERITY_TEXT: Record<Severity, string> = {
+  P1: '#ffffff', P2: '#ffffff', P3: '#15181c', P4: '#ffffff',
 }
 
 // Barangays Mambaling and Pardo, Cebu City

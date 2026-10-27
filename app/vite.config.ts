@@ -13,7 +13,7 @@ export default defineConfig({
         name: 'TUGON AI',
         short_name: 'TUGON',
         description: 'AI-assisted barangay incident reporting and routing',
-        theme_color: '#b71c1c',
+        theme_color: '#15181c',
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',

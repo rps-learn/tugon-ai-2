@@ -28,6 +28,7 @@ const en = {
   loc_label: 'Location', loc_getting: 'Getting your location…',
   loc_fail: 'Could not get your location. Tap the map to place the pin.',
   loc_hint: 'Tap the map to adjust the pin', purok_label: 'Purok / Sitio (optional)',
+  landmark_label: 'Landmark (optional), e.g. near the basketball court',
   anon_label: 'Report anonymously',
   submit: 'Submit report', submitting: 'Sending…',
   need_input: 'Add a photo or a description.',
@@ -36,6 +37,8 @@ const en = {
   msg_p4: 'Thank you for reporting',
   msg_review: 'Report received. A barangay official is reviewing it.',
   msg_offline: 'Saved on your device. It will be sent when you are back online.',
+  msg_classifying: 'Report received. Checking how urgent it is…',
+  msg_received: 'Report received. It is being processed.',
   msg_error: 'Something went wrong. Please try again.',
   new_report: 'New report', see_status: 'See status',
   track_title: 'My reports', track_empty: 'No reports yet on this device.',
@@ -51,6 +54,10 @@ const en = {
   confirm_email: 'Account created. Check your email to confirm, then sign in.',
   language: 'Language',
   privacy_title: 'Privacy & data policy',
+  more_types: 'More types', fewer_types: 'Fewer types',
+  loading: 'Loading…', track_cta: 'Report an incident',
+  nf_title: 'Page not found', nf_body: 'This page does not exist or may have been moved. You can go back and file a report.',
+  nf_cta: 'Back to report',
 }
 
 type Dict = typeof en
@@ -76,6 +83,7 @@ const ceb: Partials = {
   loc_label: 'Lokasyon', loc_getting: 'Gikuha ang imong lokasyon…',
   loc_fail: 'Dili makuha ang lokasyon. I-tap ang mapa aron ibutang ang pin.',
   loc_hint: 'I-tap ang mapa aron ibalhin ang pin', purok_label: 'Purok / Sitio (kapilian)',
+  landmark_label: 'Landmark (kapilian), pananglitan: duol sa basketball court',
   anon_label: 'Mag-report nga walay ngalan',
   submit: 'Ipadala ang report', submitting: 'Gipadala…',
   need_input: 'Pagdugang og litrato o deskripsyon.',
@@ -84,6 +92,8 @@ const ceb: Partials = {
   msg_p3: 'Natala na ang report', msg_p4: 'Salamat sa imong report',
   msg_review: 'Nadawat ang report. Gisusi kini sa opisyal sa barangay.',
   msg_offline: 'Gitipigan sa imong device. Ipadala kini kung adunay koneksyon na.',
+  msg_classifying: 'Nadawat ang report. Gisusi kung unsa ka dinaliay.',
+  msg_received: 'Nadawat ang report. Giproseso kini.',
   msg_error: 'Adunay sayop. Sulayi pag-usab.',
   new_report: 'Bag-ong report', see_status: 'Tan-awa ang status',
   track_title: 'Akong mga report', track_empty: 'Wala pay report niining device.',
@@ -96,6 +106,7 @@ const ceb: Partials = {
   to_signup: 'Wala pay account? Paghimo', to_login: 'Naa nay account? Sign in',
   guest_note: 'Makareport ka bisan walay account. Mag-sign in lang aron magamit ang imong mga report sa lain nga device.',
   language: 'Pinulongan',
+  more_types: 'Dugang klase', fewer_types: 'Gamayng klase', loading: 'Nagkarga…', track_cta: 'Mag-report sa insidente',
 }
 
 const tl: Partials = {
@@ -118,6 +129,7 @@ const tl: Partials = {
   loc_label: 'Lokasyon', loc_getting: 'Kinukuha ang iyong lokasyon…',
   loc_fail: 'Hindi makuha ang lokasyon. I-tap ang mapa para ilagay ang pin.',
   loc_hint: 'I-tap ang mapa para ilipat ang pin', purok_label: 'Purok / Sitio (opsyonal)',
+  landmark_label: 'Landmark (opsyonal), hal. malapit sa basketball court',
   anon_label: 'Mag-ulat nang hindi nagpapakilala',
   submit: 'Ipadala ang ulat', submitting: 'Ipinapadala…',
   need_input: 'Magdagdag ng larawan o paglalarawan.',
@@ -126,6 +138,8 @@ const tl: Partials = {
   msg_p3: 'Naitala na ang ulat', msg_p4: 'Salamat sa iyong ulat',
   msg_review: 'Natanggap ang ulat. Sinusuri ito ng opisyal ng barangay.',
   msg_offline: 'Nai-save sa iyong device. Ipapadala kapag may koneksyon na.',
+  msg_classifying: 'Natanggap ang ulat. Sinusuri kung gaano ito kaagaran.',
+  msg_received: 'Natanggap ang ulat. Pinoproseso ito.',
   msg_error: 'May nangyaring mali. Subukan muli.',
   new_report: 'Bagong ulat', see_status: 'Tingnan ang status',
   track_title: 'Mga ulat ko', track_empty: 'Wala pang ulat sa device na ito.',
@@ -138,6 +152,7 @@ const tl: Partials = {
   to_signup: 'Walang account? Gumawa', to_login: 'May account na? Sign in',
   guest_note: 'Maaari kang mag-ulat nang walang account. Mag-sign in lang para magamit ang mga ulat mo sa ibang device.',
   language: 'Wika',
+  more_types: 'Iba pang uri', fewer_types: 'Kaunting uri', loading: 'Naglo-load…', track_cta: 'Mag-ulat ng insidente',
 }
 
 const DICTS: Record<Lang, Partials> = { en, ceb, tl }

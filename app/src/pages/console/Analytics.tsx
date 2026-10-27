@@ -70,7 +70,7 @@ export default function Analytics({ incidents }: { incidents: Incident[] }) {
 
   return (
     <div className="stack">
-      <div className="card row wrap filters">
+      <div className="card filters">
         <label>Period
           <select value={days} onChange={(e) => setDays(Number(e.target.value))}>
             <option value={30}>Last 30 days</option><option value={90}>Last 90 days</option>
@@ -98,14 +98,14 @@ export default function Analytics({ incidents }: { incidents: Incident[] }) {
       </div>
 
       <div className="kpis">
-        <div className="card kpi"><span className="muted small">Incidents</span><b>{rows.length}</b>
-          <span className="small muted">{delta === null ? 'no prior period' : `${delta > 0 ? '+' : ''}${delta}% vs previous ${days} days`}</span></div>
-        <div className="card kpi"><span className="muted small">Avg. time to acknowledge</span><b>{fmtMinutes(avg(allAck))}</b></div>
-        <div className="card kpi"><span className="muted small">P1 incidents</span><b>{rows.filter((i) => i.severity === 'P1').length}</b></div>
+        <div className="card kpi"><span className="muted">Incidents</span><b>{rows.length}</b>
+          <span className="muted">{delta === null ? 'no prior period' : `${delta > 0 ? '+' : ''}${delta}% vs previous ${days} days`}</span></div>
+        <div className="card kpi"><span className="muted">Avg. time to acknowledge</span><b>{fmtMinutes(avg(allAck))}</b></div>
+        <div className="card kpi"><span className="muted">P1 incidents</span><b>{rows.filter((i) => i.severity === 'P1').length}</b></div>
       </div>
 
       <div className="card">
-        <h3>Incidents per month</h3>
+        <h2>Incidents per month</h2>
         <ResponsiveContainer width="100%" height={240}>
           <LineChart data={monthly}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="month" /><YAxis allowDecimals={false} /><Tooltip />
             <Line type="monotone" dataKey="total" stroke="#b71c1c" strokeWidth={2} name="Incidents" /></LineChart>
@@ -113,7 +113,7 @@ export default function Analytics({ incidents }: { incidents: Incident[] }) {
       </div>
 
       <div className="card">
-        <h3>Severity per month</h3>
+        <h2>Severity per month</h2>
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={monthly}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="month" /><YAxis allowDecimals={false} /><Tooltip /><Legend />
             {SEVERITIES.map((s) => <Bar key={s} dataKey={s} stackId="a" fill={SEVERITY_COLOR[s]} />)}</BarChart>
@@ -121,7 +121,7 @@ export default function Analytics({ incidents }: { incidents: Incident[] }) {
       </div>
 
       <div className="card">
-        <h3>By incident type</h3>
+        <h2>By incident type</h2>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={byCategory} layout="vertical" margin={{ left: 30 }}><CartesianGrid strokeDasharray="3 3" />
             <XAxis type="number" allowDecimals={false} /><YAxis type="category" dataKey="name" width={130} /><Tooltip />
@@ -130,7 +130,7 @@ export default function Analytics({ incidents }: { incidents: Incident[] }) {
       </div>
 
       <div className="card">
-        <h3>Response time by agency (minutes)</h3>
+        <h2>Response time by agency (minutes)</h2>
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={byAgency.map((a) => ({ ...a, ack: a.ack && Math.round(a.ack), res: a.res && Math.round(a.res) }))}>
             <CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis /><Tooltip /><Legend />

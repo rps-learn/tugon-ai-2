@@ -28,24 +28,38 @@ export function PinPicker({ pos, onPick }: { pos: { lat: number; lng: number } |
   )
 }
 
-export function IncidentMap({ incidents, onSelect }: { incidents: Incident[]; onSelect?: (id: string) => void }) {
+function FlyTo({ target }: { target: [number, number] | null }) {
+  const map = useMap()
+  useEffect(() => {
+    if (target) map.flyTo(target, 17, { duration: 0.8 })
+  }, [map, target?.[0], target?.[1]]) // eslint-disable-line react-hooks/exhaustive-deps
+  return null
+}
+
+export function IncidentMap({ incidents, selectedId, onSelect }: {
+  incidents: Incident[]; selectedId?: string | null; onSelect?: (id: string) => void
+}) {
   const open = incidents.filter((i) => i.lat !== null && i.lng !== null)
+  const sel = open.find((i) => i.id === selectedId)
   return (
     <MapContainer center={MAP_CENTER} zoom={14} className="map" scrollWheelZoom>
       <TileLayer url={TILES} attribution={ATTR} />
+      <FlyTo target={sel ? [sel.lat!, sel.lng!] : null} />
       {open.map((i) => {
         const color = SEVERITY_COLOR[i.severity ?? 'P4']
+        const chosen = i.id === selectedId
         return (
           <CircleMarker
             key={i.id}
             center={[i.lat!, i.lng!]}
-            radius={i.severity === 'P1' ? 11 : i.severity === 'P2' ? 9 : 7}
-            pathOptions={{ color, fillColor: color, fillOpacity: 0.7, weight: i.needs_review ? 3 : 1 }}
+            radius={(i.severity === 'P1' ? 11 : i.severity === 'P2' ? 9 : 7) + (chosen ? 5 : 0)}
+            pathOptions={{ color: chosen ? '#111' : color, fillColor: color, fillOpacity: 0.75, weight: chosen ? 4 : i.needs_review ? 3 : 1 }}
             eventHandlers={{ click: () => onSelect?.(i.id) }}
           >
             <Popup>
               <b>{i.severity ?? '?'} · {CATEGORY_LABEL[i.category ?? ''] ?? 'Unclassified'}</b>
-              <br />{i.purok ?? ''} {i.description?.slice(0, 80)}
+              <br />{i.landmark ?? i.purok ?? ''}
+              {i.address && <><br /><small>{i.address}</small></>}
             </Popup>
           </CircleMarker>
         )

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import SeverityBadge from '../../components/SeverityBadge'
 import {
-  AGENCIES, AGENCY_LABEL, CATEGORIES, CATEGORY_LABEL, SEVERITIES, SEVERITY_COLOR, type Incident,
+  AGENCIES, AGENCY_LABEL, CATEGORIES, CATEGORY_LABEL, SEVERITIES, type Incident,
 } from '../../lib/types'
 import { timeAgo } from '../../lib/util'
 
@@ -27,15 +28,17 @@ function ReviewRow({ i, onDone }: { i: Incident; onDone: () => void }) {
     <article className="card stack">
       <div className="row between">
         <div className="row">
-          <span className="badge" style={{ background: SEVERITY_COLOR[i.severity ?? 'P4'] }}>{i.severity ?? '?'}</span>
+          <SeverityBadge severity={i.severity} />
           <strong>{i.in_progress ? 'In progress' : 'Not in progress'}</strong>
         </div>
-        <span className="muted small">{timeAgo(i.created_at)}</span>
+        <span className="muted caption">{timeAgo(i.created_at)}</span>
       </div>
       <p className="desc">{i.description || '(photo only)'}</p>
-      <p className="muted small">
+      <p className="muted">
         AI: {i.urgency_note ?? 'no suggestion'} — confidence {Math.round((i.confidence ?? 0) * 100)}%
         {i.purok ? ` · ${i.purok}` : ''}
+        {i.landmark ? ` · Landmark: ${i.landmark}` : ''}
+        {i.address ? ` · ${i.address}` : ''}
       </p>
       <div className="grid4">
         <label>Category
@@ -60,7 +63,7 @@ function ReviewRow({ i, onDone }: { i: Incident; onDone: () => void }) {
           </select>
         </label>
       </div>
-      {err && <div className="banner err">{err}</div>}
+      {err && <div className="banner err" role="alert">{err}</div>}
       <button className="btn" disabled={busy} onClick={route}>
         {i.category ? 'Confirm / re-route and notify agency' : 'Route and notify agency'}
       </button>
@@ -73,7 +76,7 @@ export default function Review({ incidents, onChanged }: { incidents: Incident[]
   return (
     <div className="stack">
       <p className="muted">Reports the AI was unsure about (under 70% confidence) or could not classify. Agencies cannot see them until you route them.</p>
-      {queue.length === 0 && <p>Nothing waiting for review. 🎉</p>}
+      {queue.length === 0 && <div className="card"><p>Nothing is waiting for review. New low-confidence reports appear here.</p></div>}
       {queue.map((i) => <ReviewRow key={i.id} i={i} onDone={onChanged} />)}
     </div>
   )
