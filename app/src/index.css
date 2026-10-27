@@ -116,36 +116,41 @@ main:focus { outline: none; }
 .btn.ghost { background: transparent; color: #fff; border-color: rgb(255 255 255 / 0.5); }
 .btn.ghost:hover { background: rgb(255 255 255 / 0.14); color: #fff; }
 
-/* Phones: primary navigation lives at the bottom, within thumb reach. */
-.mainnav {
+/* Phones: primary navigation is a bottom tab bar within thumb reach.
+   It is its own element (not inside the sticky header) with a solid background, so content never shows through. */
+.desktop-nav { display: none; }
+.bottom-nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; display: flex;
-  background: var(--color-bg); border-top: 1px solid var(--color-border);
+  background-color: #ffffff; border-top: 1px solid var(--color-border-strong);
+  box-shadow: 0 -2px 8px rgb(15 24 32 / 0.1);
   padding-bottom: env(safe-area-inset-bottom);
 }
-.mainnav a {
+.bottom-nav a {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-xs);
-  min-height: 56px; padding: var(--space-sm); color: var(--color-text-muted); text-decoration: none;
+  min-height: 56px; padding: var(--space-sm); background-color: #ffffff; color: var(--color-text-muted); text-decoration: none;
   font-size: var(--text-caption); line-height: var(--leading-caption); font-weight: 600;
 }
-.mainnav a:hover { color: var(--color-accent); }
-.mainnav a[aria-current='page'] { color: var(--color-accent); box-shadow: inset 0 3px 0 var(--color-accent); }
+.bottom-nav a:hover { color: var(--color-accent); }
+.bottom-nav a[aria-current='page'] { color: var(--color-accent); background-color: var(--color-accent-subtle); box-shadow: inset 0 3px 0 var(--color-accent); }
 .nav-icon { font-size: var(--text-lead); line-height: 1; }
 @media (max-width: 767px) { body { padding-bottom: calc(56px + env(safe-area-inset-bottom)); } }
 
 /* Tablet and up: navigation moves into the header, where people expect it. */
 @media (min-width: 768px) {
+  .bottom-nav { display: none; }
   .brand { margin-right: 0; }
-  .mainnav { position: static; flex: 1; background: transparent; border: 0; padding: 0; gap: var(--space-sm); }
-  .mainnav a {
-    flex: none; flex-direction: row; min-height: var(--touch-target); padding: 0 var(--space-md); border-radius: var(--radius-md);
-    color: #fff; opacity: 0.85; font-size: var(--text-body); line-height: var(--leading-body);
+  .desktop-nav { display: flex; flex: 1; gap: var(--space-sm); }
+  .desktop-nav a {
+    display: inline-flex; align-items: center; min-height: var(--touch-target); padding: 0 var(--space-md); border-radius: var(--radius-md);
+    color: #fff; opacity: 0.85; text-decoration: none; font-weight: 600;
+    transition: background var(--transition), opacity var(--transition);
   }
-  .mainnav a:hover { color: #fff; background: rgb(255 255 255 / 0.14); opacity: 1; }
-  .mainnav a[aria-current='page'] { box-shadow: none; background: rgb(255 255 255 / 0.2); color: #fff; opacity: 1; }
-  .nav-icon { display: none; }
+  .desktop-nav a:hover { color: #fff; background: rgb(255 255 255 / 0.14); opacity: 1; }
+  .desktop-nav a[aria-current='page'] { background: rgb(255 255 255 / 0.2); color: #fff; opacity: 1; }
+  .desktop-nav .nav-icon { display: none; }
 }
 @media (min-width: 1024px) { .brand small { display: inline; } }
-.brand, .btn.ghost, .mainnav a { white-space: nowrap; }
+.brand, .btn.ghost, .desktop-nav a, .bottom-nav a { white-space: nowrap; }
 
 .footer { max-width: 640px; margin: 0 auto; padding: var(--space-lg) var(--space-md) var(--space-xl); color: var(--color-text-muted); text-align: center; display: flex; flex-direction: column; gap: var(--space-sm); }
 .footer a { display: inline-flex; align-items: center; min-height: var(--touch-target); }

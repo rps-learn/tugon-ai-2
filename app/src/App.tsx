@@ -10,19 +10,29 @@ import PrivacyPage from './pages/Privacy'
 import NotFound from './pages/NotFound'
 import ConsolePage from './pages/console/Console'
 
+// The same links are rendered twice: in the header (tablet and up) and as a bottom tab bar (phones).
+// CSS shows only one of them, so screen readers never see duplicates.
+function NavItems() {
+  const { t } = useI18n()
+  const { profile } = useAuth()
+  const isResponder = profile && profile.role !== 'citizen'
+  return (
+    <>
+      <NavLink to="/" end><span className="nav-icon" aria-hidden="true">📝</span>{t('nav_report')}</NavLink>
+      <NavLink to="/track"><span className="nav-icon" aria-hidden="true">📋</span>{t('nav_track')}</NavLink>
+      {isResponder && <NavLink to="/console"><span className="nav-icon" aria-hidden="true">🗂️</span>{t('nav_console')}</NavLink>}
+    </>
+  )
+}
+
 function Header() {
   const { t, lang, setLang } = useI18n()
   const { profile, signOut } = useAuth()
   const nav = useNavigate()
-  const isResponder = profile && profile.role !== 'citizen'
   return (
     <header className="topbar">
       <Link to="/" className="brand">TUGON AI <small>{t('tagline')}</small></Link>
-      <nav className="mainnav" aria-label="Main">
-        <NavLink to="/" end><span className="nav-icon" aria-hidden="true">📝</span>{t('nav_report')}</NavLink>
-        <NavLink to="/track"><span className="nav-icon" aria-hidden="true">📋</span>{t('nav_track')}</NavLink>
-        {isResponder && <NavLink to="/console"><span className="nav-icon" aria-hidden="true">🗂️</span>{t('nav_console')}</NavLink>}
-      </nav>
+      <nav className="desktop-nav" aria-label="Main"><NavItems /></nav>
       <div className="topbar-right">
         <select aria-label={t('language')} value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
           {LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
@@ -95,6 +105,7 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
+      <nav className="bottom-nav" aria-label="Main"><NavItems /></nav>
     </>
   )
 }
