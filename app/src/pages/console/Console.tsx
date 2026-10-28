@@ -1,15 +1,17 @@
 import { useMemo, useState } from 'react'
 import { IncidentMap } from '../../components/Maps'
 import { useAuth } from '../../lib/auth'
-import { AGENCY_LABEL } from '../../lib/types'
+import { useI18n } from '../../lib/i18n'
 import Analytics from './Analytics'
+import Audit from './Audit'
 import IncidentCard from './IncidentCard'
 import Review from './Review'
 import { useIncidents } from './useIncidents'
 
-type Tab = 'incidents' | 'review' | 'analytics'
+type Tab = 'incidents' | 'review' | 'analytics' | 'audit'
 
 export default function ConsolePage() {
+  const { t, agency } = useI18n()
   const { profile } = useAuth()
   const { incidents, loading, reload, alert, clearAlert } = useIncidents()
   const [tab, setTab] = useState<Tab>('incidents')
@@ -35,31 +37,36 @@ export default function ConsolePage() {
     }
   }, [incidents, showResolved])
 
+  const tabs: { key: Tab; label: string }[] = [
+    { key: 'incidents', label: t('tab_incidents') },
+    ...(isOfficial ? [{ key: 'review' as Tab, label: `${t('tab_review')}${reviewCount ? ` (${reviewCount})` : ''}` }] : []),
+    { key: 'analytics', label: t('tab_analytics') },
+    ...(isOfficial ? [{ key: 'audit' as Tab, label: t('tab_audit') }] : []),
+  ]
+
   return (
     <div className="stack wide">
-      <div className="console-head">
-        <h1>{profile ? `${AGENCY_LABEL[(isOfficial ? 'official' : profile.role) as 'bfp']} Console` : 'Console'}</h1>
+      <div className="console-head no-print">
+        <h1>{profile ? t('console_title', { agency: agency(isOfficial ? 'official' : profile.role) }) : 'Console'}</h1>
         <div className="tabs" role="tablist">
-          <button role="tab" aria-selected={tab === 'incidents'} className={tab === 'incidents' ? 'on' : ''} onClick={() => setTab('incidents')}>Incidents</button>
-          {isOfficial && (
-            <button role="tab" aria-selected={tab === 'review'} className={tab === 'review' ? 'on' : ''} onClick={() => setTab('review')}>
-              Review{reviewCount ? ` (${reviewCount})` : ''}
+          {tabs.map((x) => (
+            <button key={x.key} role="tab" aria-selected={tab === x.key} className={tab === x.key ? 'on' : ''} onClick={() => setTab(x.key)}>
+              {x.label}
             </button>
-          )}
-          <button role="tab" aria-selected={tab === 'analytics'} className={tab === 'analytics' ? 'on' : ''} onClick={() => setTab('analytics')}>Analytics</button>
+          ))}
         </div>
       </div>
 
       {alert && (
-        <button type="button" className="banner err" role="alert" onClick={clearAlert}>🚨 {alert} — tap to dismiss</button>
+        <button type="button" className="banner err no-print" role="alert" onClick={clearAlert}>🚨 {alert} — {t('alert_dismiss')}</button>
       )}
       {isOfficial && reviewCount > 0 && tab !== 'review' && (
-        <button type="button" className="banner warn" onClick={() => setTab('review')}>
-          {reviewCount} report{reviewCount > 1 ? 's need' : ' needs'} manual routing. Open the Review tab.
+        <button type="button" className="banner warn no-print" onClick={() => setTab('review')}>
+          {reviewCount === 1 ? t('review_banner_one') : t('review_banner_many', { n: reviewCount })}
         </button>
       )}
 
-      {loading && <p className="loading"><span className="spinner" aria-hidden="true" /> Loading incidents…</p>}
+      {loading && <p className="loading"><span className="spinner" aria-hidden="true" /> {t('loading_incidents')}</p>}
 
       {tab === 'incidents' && !loading && (
         <div className="console-grid">
@@ -67,10 +74,10 @@ export default function ConsolePage() {
           <div className="stack">
             <label className="check">
               <input type="checkbox" checked={showResolved} onChange={(e) => setShowResolved(e.target.checked)} />
-              Show resolved
+              {t('show_resolved')}
             </label>
             {list.length === 0 && (
-              <div className="card"><p>No open incidents right now. New reports appear here automatically.</p></div>
+              <div className="card"><p>{t('no_open')}</p></div>
             )}
             {list.map((i) => (
               <IncidentCard key={i.id} incident={i} duplicates={dupCount.get(i.id) ?? 0}
@@ -81,6 +88,7 @@ export default function ConsolePage() {
       )}
       {tab === 'review' && isOfficial && <Review incidents={incidents} onChanged={reload} />}
       {tab === 'analytics' && <Analytics incidents={incidents} />}
+      {tab === 'audit' && isOfficial && <Audit />}
     </div>
   )
 }

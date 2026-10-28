@@ -162,3 +162,96 @@ grant execute on function public.current_role_name() to authenticated;
 
 -- Readable location: reverse-geocoded address (set by the triage function) and a citizen-typed landmark.
 alter table public.incidents add column if not exists landmark text, add column if not exists address text;
+
+-- ---------------------------------------------------------------------------
+-- v2: SOS to all responders, outcome marking, reporter labels, rate limiting, retention
+-- ---------------------------------------------------------------------------
+alter table public.incidents
+  add column if not exists is_sos boolean not null default false,
+  add column if not exists reporter_type text not null default 'guest'
+    check (reporter_type in ('registered','guest','anonymous')),
+  add column if not exists outcome text check (outcome in ('confirmed','false_alarm','unverified')),
+  add column if not exists outcome_at timestamptz;
+
+-- SOS reaches every responder agency (BFP, ERUF, Police), whatever the AI decided.
+drop policy if exists "incident visibility" on public.incidents;
+create policy "incident visibility" on public.incidents for select to authenticated
+using (
+  reporter_id = auth.uid()
+  or public.current_role_name() = 'official'
+  or (
+    public.current_role_name() in ('bfp','eruf','police')
+    and needs_review = false
+    and (is_sos or primary_agency = public.current_role_name() or secondary_agency = public.current_role_name())
+  )
+);
+
+create or replace function public.update_incident_status(p_id uuid, p_status text, p_note text default null)
+returns void language plpgsql security definer set search_path = public as $$
+declare
+  r text := public.current_role_name();
+  i public.incidents;
+begin
+  if p_status not in ('acknowledged','en_route','on_scene','resolved') then
+    raise exception 'invalid status';
+  end if;
+  select * into i from public.incidents where id = p_id;
+  if not found then raise exception 'not found'; end if;
+  if not (r = 'official' or (r in ('bfp','eruf','police') and not i.needs_review
+          and (i.is_sos or i.primary_agency = r or i.secondary_agency = r))) then
+    raise exception 'forbidden';
+  end if;
+  update public.incidents set
+    status = p_status,
+    acknowledged_at = coalesce(acknowledged_at, now()),
+    resolved_at = case when p_status = 'resolved' then now() else resolved_at end,
+    resolution_note = case when p_status = 'resolved' then p_note else resolution_note end
+  where id = p_id;
+  insert into public.incident_events (incident_id, actor_id, action, note)
+  values (p_id, auth.uid(), 'status:' || p_status, p_note);
+end $$;
+
+-- Responders record whether the report turned out to be real.
+create or replace function public.set_incident_outcome(p_id uuid, p_outcome text)
+returns void language plpgsql security definer set search_path = public as $$
+declare
+  r text := public.current_role_name();
+  i public.incidents;
+begin
+  if p_outcome not in ('confirmed','false_alarm','unverified') then
+    raise exception 'invalid outcome';
+  end if;
+  select * into i from public.incidents where id = p_id;
+  if not found then raise exception 'not found'; end if;
+  if not (r = 'official' or (r in ('bfp','eruf','police') and not i.needs_review
+          and (i.is_sos or i.primary_agency = r or i.secondary_agency = r))) then
+    raise exception 'forbidden';
+  end if;
+  update public.incidents set outcome = p_outcome, outcome_at = now() where id = p_id;
+  insert into public.incident_events (incident_id, actor_id, action, note)
+  values (p_id, auth.uid(), 'outcome', p_outcome);
+end $$;
+
+revoke execute on function public.update_incident_status(uuid, text, text) from public, anon;
+revoke execute on function public.set_incident_outcome(uuid, text) from public, anon;
+grant execute on function public.update_incident_status(uuid, text, text) to authenticated;
+grant execute on function public.set_incident_outcome(uuid, text) to authenticated;
+
+-- Rate-limit log: a salted hash of the connection, never linked to an incident. No policies = service role only.
+create table if not exists public.report_log (
+  id bigint generated always as identity primary key,
+  key text not null,
+  is_sos boolean not null default false,
+  created_at timestamptz not null default now()
+);
+create index if not exists report_log_key_time on public.report_log (key, created_at desc);
+alter table public.report_log enable row level security;
+revoke all on public.report_log from anon, authenticated;
+
+-- Retention: every day at 03:00 Philippine time, the `retention` Edge Function deletes reports (and photos)
+-- older than 12 months. Deploy it first: npx supabase functions deploy retention --no-verify-jwt
+create extension if not exists pg_net with schema extensions;
+create extension if not exists pg_cron;
+select cron.schedule('tugon-retention', '0 19 * * *', $$select net.http_post(
+  url := 'https://<project-ref>.supabase.co/functions/v1/retention',
+  headers := '{"Content-Type":"application/json"}'::jsonb, body := '{}'::jsonb)$$);

@@ -13,6 +13,7 @@ export interface Draft {
   landmark: string
   address: string
   anonymous: boolean
+  sos?: boolean // emergency button: the server alerts every responder agency
 }
 
 export interface TriageResult {

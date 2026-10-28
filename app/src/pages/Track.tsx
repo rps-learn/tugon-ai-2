@@ -5,8 +5,7 @@ import { useAuth } from '../lib/auth'
 import { useI18n, type TKey } from '../lib/i18n'
 import { getMyReportIds, queueSize } from '../lib/report'
 import { supabase } from '../lib/supabase'
-import { CATEGORY_LABEL, type Severity, type Status } from '../lib/types'
-import { timeAgo } from '../lib/util'
+import type { Severity, Status } from '../lib/types'
 
 interface Row {
   id: string
@@ -21,7 +20,7 @@ const STEPS: Status[] = [
 ]
 
 export default function TrackPage() {
-  const { t } = useI18n()
+  const { t, cat, ago } = useI18n()
   const { session } = useAuth()
   const [rows, setRows] = useState<Row[] | null>(null)
   const [queued, setQueued] = useState(0)
@@ -65,10 +64,10 @@ export default function TrackPage() {
         return (
           <article key={r.id} className="card">
             <div className="row between">
-              <h2>{CATEGORY_LABEL[r.category ?? ''] ?? '…'}</h2>
+              <h2>{r.category ? cat(r.category) : '…'}</h2>
               {r.severity && <SeverityBadge severity={r.severity} />}
             </div>
-            <p className="muted caption">{timeAgo(r.created_at)}</p>
+            <p className="muted caption">{ago(r.created_at)}</p>
             <ol className="steps">
               {STEPS.map((s, i) => (
                 <li key={s} className={`${i <= idx ? 'done' : ''} ${i === idx ? 'current' : ''}`} aria-current={i === idx ? 'step' : undefined}>

@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import SeverityBadge from '../../components/SeverityBadge'
-import {
-  AGENCIES, AGENCY_LABEL, CATEGORIES, CATEGORY_LABEL, SEVERITIES, type Incident,
-} from '../../lib/types'
-import { timeAgo } from '../../lib/util'
+import { useI18n, type TKey } from '../../lib/i18n'
+import { AGENCIES, CATEGORIES, SEVERITIES, type Incident } from '../../lib/types'
 
 function ReviewRow({ i, onDone }: { i: Incident; onDone: () => void }) {
+  const { t, cat, agency, ago } = useI18n()
   const [category, setCategory] = useState(i.category ?? 'social_general')
   const [primary, setPrimary] = useState(i.primary_agency ?? 'official')
   const [secondary, setSecondary] = useState(i.secondary_agency ?? '')
@@ -27,56 +26,58 @@ function ReviewRow({ i, onDone }: { i: Incident; onDone: () => void }) {
   return (
     <article className="card stack">
       <div className="row between">
-        <div className="row">
+        <div className="row wrap">
           <SeverityBadge severity={i.severity} />
-          <strong>{i.in_progress ? 'In progress' : 'Not in progress'}</strong>
+          <strong>{i.in_progress ? t('in_progress') : t('not_in_progress')}</strong>
+          <span className={`pill ${i.reporter_type === 'registered' ? '' : 'warn'}`}>{t(`reporter_${i.reporter_type}` as TKey)}</span>
         </div>
-        <span className="muted caption">{timeAgo(i.created_at)}</span>
+        <span className="muted caption">{ago(i.created_at)}</span>
       </div>
-      <p className="desc">{i.description || '(photo only)'}</p>
+      <p className="desc">{i.description || t('photo_only')}</p>
       <p className="muted">
-        AI: {i.urgency_note ?? 'no suggestion'} — confidence {Math.round((i.confidence ?? 0) * 100)}%
+        {t('ai_label')}: {i.urgency_note ?? t('no_suggestion')} — {t('conf_word')} {Math.round((i.confidence ?? 0) * 100)}%
         {i.purok ? ` · ${i.purok}` : ''}
-        {i.landmark ? ` · Landmark: ${i.landmark}` : ''}
+        {i.landmark ? ` · ${t('landmark')}: ${i.landmark}` : ''}
         {i.address ? ` · ${i.address}` : ''}
       </p>
       <div className="grid4">
-        <label>Category
+        <label>{t('f_category')}
           <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>)}
+            {CATEGORIES.map((c) => <option key={c} value={c}>{cat(c)}</option>)}
           </select>
         </label>
-        <label>Severity
+        <label>{t('f_severity')}
           <select value={severity} onChange={(e) => setSeverity(e.target.value as typeof severity)}>
             {SEVERITIES.map((s) => <option key={s}>{s}</option>)}
           </select>
         </label>
-        <label>Primary agency
+        <label>{t('f_primary')}
           <select value={primary} onChange={(e) => setPrimary(e.target.value as typeof primary)}>
-            {AGENCIES.map((a) => <option key={a} value={a}>{AGENCY_LABEL[a]}</option>)}
+            {AGENCIES.map((a) => <option key={a} value={a}>{agency(a)}</option>)}
           </select>
         </label>
-        <label>Secondary
+        <label>{t('f_secondary')}
           <select value={secondary} onChange={(e) => setSecondary(e.target.value as typeof secondary)}>
-            <option value="">None</option>
-            {AGENCIES.filter((a) => a !== primary).map((a) => <option key={a} value={a}>{AGENCY_LABEL[a]}</option>)}
+            <option value="">{t('none')}</option>
+            {AGENCIES.filter((a) => a !== primary).map((a) => <option key={a} value={a}>{agency(a)}</option>)}
           </select>
         </label>
       </div>
       {err && <div className="banner err" role="alert">{err}</div>}
       <button className="btn" disabled={busy} onClick={route}>
-        {i.category ? 'Confirm / re-route and notify agency' : 'Route and notify agency'}
+        {busy && <span className="spinner" aria-hidden="true" />}{i.category ? t('route_confirm') : t('route_new')}
       </button>
     </article>
   )
 }
 
 export default function Review({ incidents, onChanged }: { incidents: Incident[]; onChanged: () => void }) {
+  const { t } = useI18n()
   const queue = incidents.filter((i) => i.needs_review)
   return (
     <div className="stack">
-      <p className="muted">Reports the AI was unsure about (under 70% confidence) or could not classify. Agencies cannot see them until you route them.</p>
-      {queue.length === 0 && <div className="card"><p>Nothing is waiting for review. New low-confidence reports appear here.</p></div>}
+      <p className="muted">{t('review_intro')}</p>
+      {queue.length === 0 && <div className="card"><p>{t('review_empty')}</p></div>}
       {queue.map((i) => <ReviewRow key={i.id} i={i} onDone={onChanged} />)}
     </div>
   )

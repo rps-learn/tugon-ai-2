@@ -3,6 +3,7 @@ import { Link, Navigate, NavLink, Route, Routes, useNavigate } from 'react-route
 import { useAuth } from './lib/auth'
 import { LANGS, useI18n, type Lang } from './lib/i18n'
 import { flushQueue, queueSize } from './lib/report'
+import { useTheme, type Theme } from './lib/theme'
 import ReportPage from './pages/Report'
 import TrackPage from './pages/Track'
 import LoginPage from './pages/Login'
@@ -25,15 +26,31 @@ function NavItems() {
   )
 }
 
+const THEME_ICON: Record<Theme, string> = { auto: '🖥️', light: '☀️', dark: '🌙' }
+const NEXT_THEME: Record<Theme, Theme> = { auto: 'light', light: 'dark', dark: 'auto' }
+
+function ThemeButton() {
+  const { t } = useI18n()
+  const { theme, setTheme } = useTheme()
+  const label = t(`theme_${theme}` as 'theme_auto')
+  return (
+    <button type="button" className="btn ghost icon" aria-label={`${t('theme_label')}: ${label}`} title={`${t('theme_label')}: ${label}`}
+      onClick={() => setTheme(NEXT_THEME[theme])}>
+      <span aria-hidden="true">{THEME_ICON[theme]}</span>
+    </button>
+  )
+}
+
 function Header() {
   const { t, lang, setLang } = useI18n()
   const { profile, signOut } = useAuth()
   const nav = useNavigate()
   return (
-    <header className="topbar">
+    <header className="topbar no-print">
       <Link to="/" className="brand">TUGON AI <small>{t('tagline')}</small></Link>
       <nav className="desktop-nav" aria-label="Main"><NavItems /></nav>
       <div className="topbar-right">
+        <ThemeButton />
         <select aria-label={t('language')} value={lang} onChange={(e) => setLang(e.target.value as Lang)}>
           {LANGS.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
         </select>
@@ -53,7 +70,7 @@ function Header() {
 function Footer() {
   const { t } = useI18n()
   return (
-    <footer className="footer">
+    <footer className="footer no-print">
       <p>{t('disclaimer')}</p>
       <p><Link to="/privacy">{t('nav_privacy')}</Link></p>
       <p className="caption">TUGON AI · Barangay Mambaling &amp; Pardo, Cebu City</p>
@@ -105,7 +122,7 @@ export default function App() {
         </Routes>
       </main>
       <Footer />
-      <nav className="bottom-nav" aria-label="Main"><NavItems /></nav>
+      <nav className="bottom-nav no-print" aria-label="Main"><NavItems /></nav>
     </>
   )
 }

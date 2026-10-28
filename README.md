@@ -4,6 +4,8 @@ AI-assisted barangay incident reporting and routing for Barangay Mambaling and B
 
 **Pipeline:** Classify, Route, Measure, Analyze.
 
+**Also included:** SOS to every responder, outcome marking (Confirmed / False alarm / Unable to verify), reporter labels, rate limiting, an audit trail, trend alerts and a hotspot map, print / PDF reports, Cebuano and Tagalog responder screens, a dark theme and a 12-month retention job.
+
 - [Setup guide](docs/SETUP.md): accounts, keys, env vars, Vercel deploy, free-tier limits
 - [User guide](docs/USER_GUIDE.md): citizen, Barangay Official, BFP / ERUF / Police
 - [Demo script](docs/DEMO_SCRIPT.md): sample scenario, test data, defense flow and likely panel questions

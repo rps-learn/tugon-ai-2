@@ -58,6 +58,59 @@ const en = {
   loading: 'Loading…', track_cta: 'Report an incident',
   nf_title: 'Page not found', nf_body: 'This page does not exist or may have been moved. You can go back and file a report.',
   nf_cta: 'Back to report',
+
+  // Responder screens
+  console_title: '{agency} Console',
+  tab_incidents: 'Incidents', tab_review: 'Review', tab_analytics: 'Analytics', tab_audit: 'Audit trail',
+  alert_new: 'New {sev} incident', alert_new_many: 'New {sev} incidents ({n})', alert_dismiss: 'tap to dismiss',
+  review_banner_one: '1 report needs manual routing. Open the Review tab.',
+  review_banner_many: '{n} reports need manual routing. Open the Review tab.',
+  loading_incidents: 'Loading incidents…', show_resolved: 'Show resolved',
+  no_open: 'No open incidents right now. New reports appear here automatically.',
+  similar: '+{n} similar', needs_review: 'needs review', no_gps: 'no GPS', ack_in: 'ack in {t}',
+  landmark: 'Landmark', address_approx: 'Address (approx.)', location: 'Location',
+  no_gps_warn: 'No GPS location', ask_reporter: 'ask the reporter',
+  open_gmaps: 'Open in Google Maps', show_map: 'Show on map',
+  ai_note: 'AI note', confidence_pct: '{n}% confidence', resolution: 'Resolution',
+  act_ack: 'Acknowledge', act_resolve: 'Resolve', resolve_prompt: 'Resolution notes (optional)',
+  err_status: 'Could not update the status: {msg}. Check your connection and try again.',
+  outcome_title: 'Was this report real?',
+  outcome_confirmed: 'Confirmed', outcome_false: 'False alarm', outcome_unverified: 'Unable to verify',
+  err_outcome: 'Could not save the outcome: {msg}',
+  reporter_registered: 'Registered account', reporter_guest: 'Guest', reporter_anonymous: 'Anonymous',
+  unclassified: 'Unclassified', photo_alt: 'Photo sent with the report',
+  time_now: 'just now', time_min: '{n} min ago', time_h: '{n} h ago', time_d: '{n} d ago',
+  review_intro: 'Reports the AI was unsure about (under 70% confidence) or could not classify. Agencies cannot see them until you route them.',
+  review_empty: 'Nothing is waiting for review. New low-confidence reports appear here.',
+  in_progress: 'In progress', not_in_progress: 'Not in progress', photo_only: '(photo only)',
+  ai_label: 'AI', no_suggestion: 'no suggestion', conf_word: 'confidence',
+  f_category: 'Category', f_severity: 'Severity', f_primary: 'Primary agency', f_secondary: 'Secondary', none: 'None',
+  route_confirm: 'Confirm / re-route and notify agency', route_new: 'Route and notify agency',
+  an_period: 'Period', an_30: 'Last 30 days', an_90: 'Last 90 days', an_180: 'Last 180 days', an_365: 'Last year',
+  an_agency: 'Agency', an_all: 'All', an_category: 'Category', an_severity: 'Severity',
+  an_export: 'Export CSV', an_print: 'Print / save as PDF',
+  kpi_incidents: 'Incidents', kpi_prev: '{n}% vs previous {d} days', kpi_noprev: 'no prior period',
+  kpi_ack: 'Avg. time to acknowledge', kpi_p1: 'P1 incidents',
+  kpi_false: 'False alarm rate', kpi_false_sub: '{n} of {m} checked', kpi_false_none: 'no outcomes recorded yet',
+  ch_month: 'Incidents per month', ch_sev: 'Severity per month', ch_type: 'By incident type',
+  ch_resp: 'Response time by agency (minutes)', ch_resp_ack: 'To acknowledge', ch_resp_res: 'To resolve', ch_inc: 'Incidents',
+  trend_title: 'Trend alerts', trend_none: 'No unusual clusters in the last 7 days.',
+  trend_line: '{n} × {cat} in {place} in the last 7 days', trend_up: 'up from {p} the week before', trend_new: 'new',
+  trend_hint: 'Compares the last 7 days with the 7 days before. This is a trend alert, not a prediction.',
+  place_none: 'an unspecified area',
+  hot_title: 'Hotspot map', hot_empty: 'No incidents with GPS in this period.', hot_popup: '{n} incidents',
+  hot_hint: 'Darker circles mean more incidents in the same ~100 m area. Based on the filters above.',
+  audit_title: 'Audit trail', audit_empty: 'Nothing recorded yet.',
+  audit_intro: 'Every routing, status change and outcome is logged here. Only the Barangay Official can see it.',
+  audit_when: 'When', audit_who: 'Who', audit_what: 'What', audit_incident: 'Incident',
+  audit_system: 'System / reporter', audit_more: 'Show more',
+  a_submitted: 'Report submitted', a_classified: 'Classified by AI', a_ai_failed: 'AI failed', a_reroute: 'Routed',
+  a_outcome: 'Outcome', report_doc_title: 'TUGON AI Incident Report',
+  theme_label: 'Theme', theme_auto: 'Auto', theme_light: 'Light', theme_dark: 'Dark',
+  ag_bfp: 'BFP', ag_eruf: 'ERUF', ag_police: 'Barangay Police', ag_official: 'Barangay Official',
+  cat_fire: 'Fire', cat_medical_emergency: 'Medical Emergency', cat_natural_disaster: 'Natural Disaster',
+  cat_crime_serious: 'Crime (Serious)', cat_crime_reported: 'Crime (Reported)',
+  cat_minor_disturbance: 'Minor Disturbance', cat_social_general: 'Social / General',
 }
 
 type Dict = typeof en
@@ -107,6 +160,58 @@ const ceb: Partials = {
   guest_note: 'Makareport ka bisan walay account. Mag-sign in lang aron magamit ang imong mga report sa lain nga device.',
   language: 'Pinulongan',
   more_types: 'Dugang klase', fewer_types: 'Gamayng klase', loading: 'Nagkarga…', track_cta: 'Mag-report sa insidente',
+
+  tab_incidents: 'Mga insidente', tab_review: 'Susiha', tab_analytics: 'Analitika', tab_audit: 'Tala sa mga buhat',
+  alert_new: 'Bag-ong {sev} nga insidente', alert_new_many: 'Mga bag-ong {sev} nga insidente ({n})',
+  alert_dismiss: 'i-tap aron isira',
+  review_banner_one: '1 ka report ang kinahanglang i-route sa kamot. Ablihi ang tab nga Susiha.',
+  review_banner_many: '{n} ka report ang kinahanglang i-route sa kamot. Ablihi ang tab nga Susiha.',
+  loading_incidents: 'Nagkarga sa mga insidente…', show_resolved: 'Ipakita ang nasulbad na',
+  no_open: 'Wala pay bukas nga insidente karon. Awtomatikong mugawas dinhi ang mga bag-ong report.',
+  similar: '+{n} susama', needs_review: 'kinahanglang susihon', no_gps: 'walay GPS', ack_in: 'gidawat sulod sa {t}',
+  landmark: 'Landmark', address_approx: 'Adres (lagmit)', location: 'Lokasyon',
+  no_gps_warn: 'Walay GPS nga lokasyon', ask_reporter: 'pangutan-a ang nag-report',
+  open_gmaps: 'Ablihi sa Google Maps', show_map: 'Ipakita sa mapa',
+  ai_note: 'Nota sa AI', confidence_pct: '{n}% pasalig', resolution: 'Resolusyon',
+  act_ack: 'Dawata', act_resolve: 'Sulbaron', resolve_prompt: 'Nota sa resolusyon (kapilian)',
+  err_status: 'Dili ma-update ang status: {msg}. Susiha ang koneksyon ug sulayi pag-usab.',
+  outcome_title: 'Tinuod ba kini nga report?',
+  outcome_confirmed: 'Nakumpirma', outcome_false: 'Bakak nga alarma', outcome_unverified: 'Dili mapamatud-an',
+  err_outcome: 'Dili ma-save ang resulta: {msg}',
+  reporter_registered: 'Rehistradong account', reporter_guest: 'Bisita', reporter_anonymous: 'Walay ngalan',
+  unclassified: 'Wala pa masuri', photo_alt: 'Litrato nga gipadala uban sa report',
+  time_now: 'karon lang', time_min: '{n} min ang milabay', time_h: '{n} oras ang milabay', time_d: '{n} adlaw ang milabay',
+  review_intro: 'Mga report nga dili sigurado ang AI (ubos sa 70% pasalig) o wala nakasuri. Dili kini makita sa mga ahensya hangtod dili nimo i-route.',
+  review_empty: 'Walay naghulat nga susihon. Dinhi mugawas ang bag-ong report nga ubos ang pasalig.',
+  in_progress: 'Nagakahitabo', not_in_progress: 'Wala nagakahitabo', photo_only: '(litrato lang)',
+  no_suggestion: 'walay sugyot', conf_word: 'pasalig',
+  f_category: 'Kategorya', f_severity: 'Kabug-at', f_primary: 'Nag-unang ahensya', f_secondary: 'Ikaduha', none: 'Wala',
+  route_confirm: 'Kumpirmahon / i-route pag-usab ug ipahibalo ang ahensya', route_new: 'I-route ug ipahibalo ang ahensya',
+  an_period: 'Panahon', an_30: 'Miaging 30 ka adlaw', an_90: 'Miaging 90 ka adlaw', an_180: 'Miaging 180 ka adlaw',
+  an_365: 'Miaging tuig', an_agency: 'Ahensya', an_all: 'Tanan', an_category: 'Kategorya', an_severity: 'Kabug-at',
+  an_export: 'I-export ang CSV', an_print: 'I-print / i-save isip PDF',
+  kpi_incidents: 'Mga insidente', kpi_prev: '{n}% kumpara sa miaging {d} ka adlaw', kpi_noprev: 'walay miaging panahon',
+  kpi_ack: 'Aberids nga oras sa pagdawat', kpi_p1: 'Mga P1 nga insidente',
+  kpi_false: 'Rate sa bakak nga alarma', kpi_false_sub: '{n} sa {m} nga nasusi', kpi_false_none: 'wala pay natala nga resulta',
+  ch_month: 'Mga insidente matag bulan', ch_sev: 'Kabug-at matag bulan', ch_type: 'Pinaagi sa klase sa insidente',
+  ch_resp: 'Oras sa tubag matag ahensya (minuto)', ch_resp_ack: 'Aron madawat', ch_resp_res: 'Aron masulbad', ch_inc: 'Mga insidente',
+  trend_title: 'Mga alerto sa uso', trend_none: 'Walay dili-pangagi nga pundok sa miaging 7 ka adlaw.',
+  trend_line: '{n} ka {cat} sa {place} sa miaging 7 ka adlaw', trend_up: 'gikan sa {p} sa miaging semana', trend_new: 'bag-o',
+  trend_hint: 'Gitandi ang miaging 7 ka adlaw sa 7 ka adlaw sa wala pa niini. Alerto ra kini sa uso, dili panagna.',
+  place_none: 'wala mahibaloi nga lugar',
+  hot_title: 'Mapa sa hotspot', hot_empty: 'Walay insidente nga adunay GPS niining panahona.', hot_popup: '{n} ka insidente',
+  hot_hint: 'Mas ngit-ngit nga lingin, mas daghang insidente sa parehas nga ~100 m nga lugar. Gibase sa mga filter sa ibabaw.',
+  audit_title: 'Tala sa mga buhat', audit_empty: 'Wala pay natala.',
+  audit_intro: 'Matag pag-route, pagbag-o sa status, ug resulta natala dinhi. Ang Opisyal ra sa Barangay ang makakita niini.',
+  audit_when: 'Kanus-a', audit_who: 'Kinsa', audit_what: 'Unsa', audit_incident: 'Insidente',
+  audit_system: 'Sistema / nag-report', audit_more: 'Ipakita ang dugang',
+  a_submitted: 'Gipadala ang report', a_classified: 'Gisuri sa AI', a_ai_failed: 'Napakyas ang AI', a_reroute: 'Gi-route',
+  a_outcome: 'Resulta', report_doc_title: 'Report sa Insidente sa TUGON AI',
+  theme_label: 'Tema', theme_auto: 'Awtomatiko', theme_light: 'Hayag', theme_dark: 'Ngit-ngit',
+  ag_police: 'Pulis sa Barangay', ag_official: 'Opisyal sa Barangay',
+  cat_fire: 'Sunog', cat_medical_emergency: 'Medikal nga Emerhensya', cat_natural_disaster: 'Katalagman',
+  cat_crime_serious: 'Krimen (Grabe)', cat_crime_reported: 'Krimen (Gi-report)',
+  cat_minor_disturbance: 'Gamay nga Kasaba', cat_social_general: 'Sosyal / Kinatibuk-an',
 }
 
 const tl: Partials = {
@@ -153,13 +258,78 @@ const tl: Partials = {
   guest_note: 'Maaari kang mag-ulat nang walang account. Mag-sign in lang para magamit ang mga ulat mo sa ibang device.',
   language: 'Wika',
   more_types: 'Iba pang uri', fewer_types: 'Kaunting uri', loading: 'Naglo-load…', track_cta: 'Mag-ulat ng insidente',
+
+  tab_incidents: 'Mga insidente', tab_review: 'Suriin', tab_analytics: 'Analytics', tab_audit: 'Audit trail',
+  alert_new: 'Bagong {sev} na insidente', alert_new_many: 'Mga bagong {sev} na insidente ({n})',
+  alert_dismiss: 'i-tap para isara',
+  review_banner_one: '1 ulat ang kailangang i-route nang mano-mano. Buksan ang tab na Suriin.',
+  review_banner_many: '{n} ulat ang kailangang i-route nang mano-mano. Buksan ang tab na Suriin.',
+  loading_incidents: 'Naglo-load ng mga insidente…', show_resolved: 'Ipakita ang nalutas na',
+  no_open: 'Walang bukas na insidente ngayon. Awtomatikong lalabas dito ang mga bagong ulat.',
+  similar: '+{n} katulad', needs_review: 'kailangang suriin', no_gps: 'walang GPS', ack_in: 'tinanggap sa loob ng {t}',
+  landmark: 'Landmark', address_approx: 'Address (tinatayang)', location: 'Lokasyon',
+  no_gps_warn: 'Walang GPS na lokasyon', ask_reporter: 'tanungin ang nag-ulat',
+  open_gmaps: 'Buksan sa Google Maps', show_map: 'Ipakita sa mapa',
+  ai_note: 'Tala ng AI', confidence_pct: '{n}% kumpiyansa', resolution: 'Resolusyon',
+  act_ack: 'Tanggapin', act_resolve: 'Lutasin', resolve_prompt: 'Tala sa resolusyon (opsyonal)',
+  err_status: 'Hindi ma-update ang status: {msg}. Suriin ang koneksyon at subukan muli.',
+  outcome_title: 'Totoo ba ang ulat na ito?',
+  outcome_confirmed: 'Nakumpirma', outcome_false: 'Maling alarma', outcome_unverified: 'Hindi ma-verify',
+  err_outcome: 'Hindi na-save ang resulta: {msg}',
+  reporter_registered: 'May rehistradong account', reporter_guest: 'Bisita', reporter_anonymous: 'Hindi nagpakilala',
+  unclassified: 'Hindi pa nasusuri', photo_alt: 'Larawang ipinadala kasama ng ulat',
+  time_now: 'ngayon lang', time_min: '{n} min ang nakalipas', time_h: '{n} oras ang nakalipas', time_d: '{n} araw ang nakalipas',
+  review_intro: 'Mga ulat na hindi sigurado ang AI (mas mababa sa 70% kumpiyansa) o hindi nito nasuri. Hindi ito makikita ng mga ahensya hangga\'t hindi mo ito nai-route.',
+  review_empty: 'Walang naghihintay na susuriin. Dito lalabas ang mga bagong ulat na mababa ang kumpiyansa.',
+  in_progress: 'Nangyayari ngayon', not_in_progress: 'Hindi nangyayari ngayon', photo_only: '(larawan lang)',
+  no_suggestion: 'walang mungkahi', conf_word: 'kumpiyansa',
+  f_category: 'Kategorya', f_severity: 'Bigat', f_primary: 'Pangunahing ahensya', f_secondary: 'Pangalawa', none: 'Wala',
+  route_confirm: 'Kumpirmahin / i-route muli at abisuhan ang ahensya', route_new: 'I-route at abisuhan ang ahensya',
+  an_period: 'Panahon', an_30: 'Nakaraang 30 araw', an_90: 'Nakaraang 90 araw', an_180: 'Nakaraang 180 araw',
+  an_365: 'Nakaraang taon', an_agency: 'Ahensya', an_all: 'Lahat', an_category: 'Kategorya', an_severity: 'Bigat',
+  an_export: 'I-export ang CSV', an_print: 'I-print / i-save bilang PDF',
+  kpi_incidents: 'Mga insidente', kpi_prev: '{n}% kumpara sa nakaraang {d} araw', kpi_noprev: 'walang nakaraang panahon',
+  kpi_ack: 'Karaniwang oras bago tanggapin', kpi_p1: 'Mga P1 na insidente',
+  kpi_false: 'Rate ng maling alarma', kpi_false_sub: '{n} sa {m} na nasuri', kpi_false_none: 'wala pang naitalang resulta',
+  ch_month: 'Mga insidente kada buwan', ch_sev: 'Bigat kada buwan', ch_type: 'Ayon sa uri ng insidente',
+  ch_resp: 'Oras ng tugon kada ahensya (minuto)', ch_resp_ack: 'Bago tanggapin', ch_resp_res: 'Bago malutas', ch_inc: 'Mga insidente',
+  trend_title: 'Mga alerto sa trend', trend_none: 'Walang kakaibang pagdami sa nakaraang 7 araw.',
+  trend_line: '{n} × {cat} sa {place} sa nakaraang 7 araw', trend_up: 'mula sa {p} noong nakaraang linggo', trend_new: 'bago',
+  trend_hint: 'Inihahambing ang nakaraang 7 araw sa 7 araw bago nito. Alerto ito sa trend, hindi hula.',
+  place_none: 'isang hindi tinukoy na lugar',
+  hot_title: 'Mapa ng hotspot', hot_empty: 'Walang insidenteng may GPS sa panahong ito.', hot_popup: '{n} insidente',
+  hot_hint: 'Mas madilim na bilog, mas maraming insidente sa parehong ~100 m na lugar. Batay sa mga filter sa itaas.',
+  audit_title: 'Audit trail', audit_empty: 'Wala pang naitala.',
+  audit_intro: 'Naka-log dito ang bawat pag-route, pagbabago ng status, at resulta. Ang Opisyal lamang ng Barangay ang makakakita nito.',
+  audit_when: 'Kailan', audit_who: 'Sino', audit_what: 'Ano', audit_incident: 'Insidente',
+  audit_system: 'Sistema / nag-ulat', audit_more: 'Magpakita pa',
+  a_submitted: 'Naipadala ang ulat', a_classified: 'Sinuri ng AI', a_ai_failed: 'Pumalya ang AI', a_reroute: 'Na-route',
+  a_outcome: 'Resulta', report_doc_title: 'Ulat ng Insidente ng TUGON AI',
+  theme_label: 'Tema', theme_auto: 'Awtomatiko', theme_light: 'Maliwanag', theme_dark: 'Madilim',
+  ag_police: 'Pulis ng Barangay', ag_official: 'Opisyal ng Barangay',
+  cat_fire: 'Sunog', cat_medical_emergency: 'Medikal na Emergency', cat_natural_disaster: 'Sakuna',
+  cat_crime_serious: 'Krimen (Malubha)', cat_crime_reported: 'Krimen (Naiulat)',
+  cat_minor_disturbance: 'Maliit na Kaguluhan', cat_social_general: 'Panlipunan / Pangkalahatan',
 }
 
 const DICTS: Record<Lang, Partials> = { en, ceb, tl }
 export type TKey = keyof Dict
 
-interface I18n { lang: Lang; setLang: (l: Lang) => void; t: (k: TKey) => string }
-const Ctx = createContext<I18n>({ lang: 'en', setLang: () => {}, t: (k) => en[k] })
+type Vars = Record<string, string | number>
+const fmt = (s: string, v?: Vars) => (v ? s.replace(/\{(\w+)\}/g, (_, k: string) => String(v[k] ?? '')) : s)
+
+interface I18n {
+  lang: Lang
+  setLang: (l: Lang) => void
+  t: (k: TKey, v?: Vars) => string
+  cat: (c: string | null) => string      // incident category label
+  agency: (a: string | null) => string   // agency label
+  ago: (iso: string) => string           // "5 min ago"
+}
+const Ctx = createContext<I18n>({
+  lang: 'en', setLang: () => {}, t: (k, v) => fmt(en[k], v),
+  cat: (c) => c ?? '', agency: (a) => a ?? '', ago: (iso) => iso,
+})
 
 function initialLang(): Lang {
   try {
@@ -175,8 +345,17 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setLangState(l)
     try { localStorage.setItem('tugon.lang', l) } catch { /* ignore */ }
   }
-  const t = (k: TKey) => DICTS[lang][k] ?? en[k]
-  return <Ctx.Provider value={{ lang, setLang, t }}>{children}</Ctx.Provider>
+  const t = (k: TKey, v?: Vars) => fmt(DICTS[lang][k] ?? en[k], v)
+  const cat = (c: string | null) => (c ? t(`cat_${c}` as TKey) : t('unclassified'))
+  const agency = (a: string | null) => t(`ag_${a ?? 'official'}` as TKey)
+  const ago = (iso: string) => {
+    const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000)
+    if (s < 60) return t('time_now')
+    if (s < 3600) return t('time_min', { n: Math.floor(s / 60) })
+    if (s < 86400) return t('time_h', { n: Math.floor(s / 3600) })
+    return t('time_d', { n: Math.floor(s / 86400) })
+  }
+  return <Ctx.Provider value={{ lang, setLang, t, cat, agency, ago }}>{children}</Ctx.Provider>
 }
 
 export const useI18n = () => useContext(Ctx)

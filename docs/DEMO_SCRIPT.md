@@ -45,7 +45,7 @@ Having the Official and BFP windows side by side lets the audience see reports a
 
 1. In the **BFP** window, open **Console**. The new fire appears at the top with a red **P1** badge, a sound plays, and a red banner says "New P1 incident". (Click anywhere on the page once beforehand so the browser allows sound.)
 2. Click the card to expand it. Show the **AI note** (reason and confidence) and the **photo**.
-3. Press **Acknowledge**, then **En route**, then **On scene**, then **Resolve** and type a note such as `Fire out, 2 residents treated.`
+3. Press **Acknowledge**, then **En route**, then **On scene**, then **Resolve** and type a note such as `Fire out, 2 residents treated.` After **Acknowledge**, a **Was this report real?** row appears: tap **Confirmed**.
 4. Sign in as **ERUF** (in the Official window, sign out first, or use another private window). Show that ERUF also sees this fire because it was the **secondary** agency.
 5. Sign in as **Police**. Show that Police does **not** see the fire. This is the **role-based access control** the research claims.
 
@@ -59,7 +59,9 @@ Open **Console**, then **Analytics**:
 - Show **incidents per month**, **severity per month**, **by incident type**.
 - Show **response time by agency** (average minutes to acknowledge and resolve). This is the study's KPI.
 - Change **Period** to 30 days and pick an **Agency** filter.
-- Click **Export CSV** to show data export.
+- Point to the **False alarm rate** card (it uses the outcomes responders recorded), the **Trend alerts** list (for example "4 × Fire in purok 2 in the last 7 days") and the **Hotspot map**.
+- Click **Export CSV** to show data export, and **Print / save as PDF** to show the barangay meeting report.
+- Open the **Audit trail** tab: every routing, status change and outcome, with who did it.
 
 ---
 
@@ -76,7 +78,7 @@ Run these from the phone as a guest. "Now?" is the happening-right-now toggle.
 | 5 | Road damage (use a pothole photo) | `Dako nga lungag sa dalan duol sa kapilya.` | No | social_general, P4, Barangay Official |
 | 6 | Flood | `Mitaas ang tubig-baha, naipit mi sa ikaduhang andana.` | Yes | natural_disaster, P1 or P2, BFP + ERUF |
 | 7 | Unclear report | `Naay problema diri palihug lang.` | Yes | **Low confidence** goes to the Official's **Review** tab |
-| 8 | SOS | Tap **SOS**, then **Send SOS now** | (automatic) | Usually a medical emergency, **P1**, sent to **ERUF and Police** (not BFP). Check the ERUF or Police console. |
+| 8 | SOS | Tap **SOS**, then **Send SOS now** | (automatic) | Always **P1** and sent to **every responder** (BFP, ERUF and Police) at once, even before the AI answers. The card has a red **SOS** badge. |
 
 ### Show the "human in the loop" (case 7)
 1. In the Official window open **Review (1)**.
@@ -97,7 +99,7 @@ Submit a report with **Report anonymously** ticked, for example: `Naay gihilabta
 3. Set the network back to **No throttling**. Within a few seconds the report sends automatically, and it appears in the console.
 
 ### Show the language switch
-Use the dropdown in the top bar to switch to **Cebuano** and **Tagalog**, then back to English. The citizen screens change language. Responder screens stay in English.
+Use the dropdown in the top bar to switch to **Cebuano** and **Tagalog**, then back to English. Both the citizen and the responder screens change language (sign in as a responder first to show the Console, Review, Analytics and Audit trail in Cebuano). Then show the sun / moon button for the dark theme.
 
 ### Test the AI with photos
 Use **Upload photo** with stock images (never real people). Try each one with text and again with the photo alone.
@@ -151,15 +153,15 @@ Response time, meaning the minutes from report to acknowledgement and to resolut
 No. Supabase, Gemini, Vercel and OpenStreetMap are all on free tiers.
 
 **How do you stop fake or false reports?**
-Honest answer: the app cannot prove a report is real. Real emergencies must not be blocked behind a login, so guest and anonymous reporting stay open. What it does today: the AI scores confidence, low-confidence reports go to a human, photos and GPS add evidence, and repeat reports of one incident are grouped. Planned next: responders mark each outcome as Confirmed, False alarm or Unable to verify; reports are labeled Verified resident, Guest or Anonymous so responders know how much to confirm first; rate limiting; and a graduated warning system for registered residents. Any penalty is the barangay's decision under its own ordinance and the Data Privacy Act, not something the app does automatically.
+Honest answer: the app cannot prove a report is real. Real emergencies must not be blocked behind a login, so guest and anonymous reporting stay open. What it does: the AI scores confidence and low-confidence reports go to a human; photos and GPS add evidence; repeat reports of one incident are grouped; each report is labeled **Registered account, Guest or Anonymous** so responders know what to confirm first; responders record every outcome as **Confirmed, False alarm or Unable to verify**, which gives a false alarm rate in Analytics; each connection is **rate limited** (20 reports and 6 SOS per hour); and an **audit trail** logs every action. "Registered" means signed in, not checked by the barangay. Future work: a graduated warning system for repeat false reporters among registered residents. Any penalty is the barangay's decision under its own ordinance and the Data Privacy Act, not something the app does automatically.
 
 **What are the limitations?**
 Be honest, because panels respect that.
 - No SMS or push notifications. The console alerts only while it is open.
+- Rate limiting is per connection (shared Wi-Fi counts as one), and trend alerts are simple counts, not predictions.
 - Free-tier limits (Supabase pauses when idle; Gemini rate limits).
 - AI accuracy was not formally evaluated yet; a test set of labeled reports is future work.
-- No rate limiting on the public report endpoint.
-- No trend prediction or PDF reports yet.
+- PDF reports use the browser's print dialog, and there is no prediction model.
 
 ---
 
@@ -187,4 +189,5 @@ delete from public.incidents where urgency_note like 'Demo open incident%';
 | No sound for alerts | Click once anywhere on the console page, then submit again. |
 | Demo logins not showing | `VITE_DEMO_MODE` is not `true` in Vercel. Set it and redeploy. |
 | Wi-Fi is bad | Show the offline queue on purpose, and keep a short screen recording of the full flow as a backup. |
-| "The responders did not receive my report" | Check which console you are in. Each report goes only to its routed agencies: an SOS goes to ERUF and Police, a fire to BFP, and so on. The Barangay Official sees everything. Unclear reports wait in the Official's **Review** tab. |
+| "Too many reports from this connection" | You hit the rate limit while rehearsing (20 reports or 6 SOS per hour). Run `delete from public.report_log;` in the Supabase SQL Editor to clear it. |
+| "The responders did not receive my report" | Check which console you are in. Each report goes only to its routed agencies: an SOS goes to all three agencies, a fire to BFP, and so on. The Barangay Official sees everything. Unclear reports wait in the Official's **Review** tab. |

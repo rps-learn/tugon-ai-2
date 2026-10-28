@@ -90,6 +90,17 @@ Understand and process input in English, Cebuano (Bisaya), Tagalog, or code-swit
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 
+// Per-connection cap per hour. SOS has its own, separate cap so spam elsewhere never blocks an emergency.
+const RATE_LIMIT = Number(Deno.env.get("RATE_LIMIT_PER_HOUR") ?? 20);
+const SOS_RATE_LIMIT = Number(Deno.env.get("SOS_RATE_LIMIT_PER_HOUR") ?? 6);
+
+async function connectionKey(req: Request): Promise<string> {
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const data = new TextEncoder().encode(`${ip}:${Deno.env.get("RATE_SALT") ?? "tugon"}`);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(hash)].slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 type Triage = {
   category: string | null; subcategory: string; primary_agency: string; secondary_agency: string | null;
   severity: string; confidence: number; urgency_note: string;
@@ -213,6 +224,7 @@ Deno.serve(async (req) => {
   const lng = typeof body.lng === "number" ? body.lng : null;
   const clientId = typeof body.client_id === "string" ? body.client_id.slice(0, 64) : null;
   const anonymous = body.anonymous === true;
+  const sos = body.sos === true;
   if (!description.trim() && !imageB64) return json({ error: "A photo or description is required" }, 400);
 
   const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
@@ -224,15 +236,34 @@ Deno.serve(async (req) => {
     if (existing) return json({ ...existing, pending: existing.status === "submitted" });
   }
 
+  // Rate limit by a salted hash of the connection (stored apart from the report, never linked to it).
+  const key = await connectionKey(req);
+  const since1h = new Date(Date.now() - 3600 * 1000).toISOString();
+  const { count } = await db.from("report_log").select("id", { count: "exact", head: true })
+    .eq("key", key).eq("is_sos", sos).gte("created_at", since1h);
+  if ((count ?? 0) >= (sos ? SOS_RATE_LIMIT : RATE_LIMIT)) {
+    return json({
+      error: "Too many reports from this connection in the last hour. Please wait and try again. In a real emergency, call 911 or your barangay hotline.",
+    }, 429);
+  }
+  await db.from("report_log").insert({ key, is_sos: sos });
+
   let reporterId: string | null = null;
   const token = req.headers.get("Authorization")?.replace("Bearer ", "");
   if (token && !anonymous) {
     const { data } = await db.auth.getUser(token);
     reporterId = data?.user?.id ?? null;
   }
+  const reporterType = anonymous ? "anonymous" : reporterId ? "registered" : "guest";
+
+  // An SOS is visible to every responder agency the moment it is saved, so it never waits on the AI.
+  const sosFields = sos
+    ? { is_sos: true, needs_review: false, severity: "P1", primary_agency: "eruf", secondary_agency: "police", status: "agency_notified" }
+    : {};
 
   const { data: row, error: insErr } = await db.from("incidents").insert({
-    client_id: clientId, reporter_id: reporterId, anonymous, description, lat, lng, purok, landmark, in_progress: inProgress,
+    client_id: clientId, reporter_id: reporterId, anonymous, reporter_type: reporterType, description, lat, lng, purok, landmark,
+    in_progress: inProgress, ...sosFields,
   }).select("id").single();
   if (insErr || !row) return json({ error: insErr?.message ?? "insert failed" }, 500);
   const id = row.id as string;
@@ -270,10 +301,10 @@ Deno.serve(async (req) => {
   }
 
   const address = await addressPromise;
-  const needsReview = triage.confidence < CONFIDENCE_THRESHOLD;
+  const needsReview = sos ? false : triage.confidence < CONFIDENCE_THRESHOLD;
 
   let clusterId: string | null = null;
-  if (triage.category && lat !== null && lng !== null) {
+  if (!sos && triage.category && lat !== null && lng !== null) {
     const since = new Date(Date.now() - 30 * 60 * 1000).toISOString();
     const { data: dup } = await db.from("incidents").select("id")
       .eq("category", triage.category).is("cluster_id", null).neq("id", id).neq("status", "resolved").gte("created_at", since)
@@ -283,9 +314,16 @@ Deno.serve(async (req) => {
   }
 
   const status = needsReview ? "classified" : "agency_notified";
-  const { error: updErr } = await db.from("incidents").update({
-    ...triage, address, photo_path: photoPath, needs_review: needsReview, status, cluster_id: clusterId,
-  }).eq("id", id);
+  // For an SOS the AI only describes the incident. Severity, visibility and status stay as saved at submit time,
+  // and the AI's agencies are shown only when it was confident (otherwise ERUF + Police stay as the default).
+  const aiFields = sos
+    ? {
+      category: triage.category, subcategory: triage.subcategory, confidence: triage.confidence, urgency_note: triage.urgency_note,
+      ...(triage.category && triage.confidence >= CONFIDENCE_THRESHOLD
+        ? { primary_agency: triage.primary_agency, secondary_agency: triage.secondary_agency } : {}),
+    }
+    : { ...triage, needs_review: needsReview, status, cluster_id: clusterId };
+  const { error: updErr } = await db.from("incidents").update({ ...aiFields, address, photo_path: photoPath }).eq("id", id);
   if (updErr) { console.error("update failed", updErr.message); return; }
 
   await db.from("incident_events").insert([
@@ -299,5 +337,7 @@ Deno.serve(async (req) => {
   };
 
   EdgeRuntime.waitUntil(finish().catch((e) => console.error("background triage crashed", e)));
-  return json({ id, status: "submitted", pending: true });
+  return json(sos
+    ? { id, status: "agency_notified", severity: "P1", needs_review: false, primary_agency: "eruf", pending: false }
+    : { id, status: "submitted", pending: true });
 });

@@ -118,7 +118,7 @@ export default function ReportPage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [sosOpen, busy])
 
-  async function send(opts: { file: File | null; description: string; inProgress: boolean; anonymous: boolean; purok: string; landmark: string }) {
+  async function send(opts: { file: File | null; description: string; inProgress: boolean; anonymous: boolean; purok: string; landmark: string; sos?: boolean }) {
     setBusy(true); setError('')
     const image = opts.file ? await compressImage(opts.file) : null
     if (opts.file && !image) {
@@ -137,6 +137,7 @@ export default function ReportPage() {
       landmark: opts.landmark,
       address,
       anonymous: opts.anonymous,
+      sos: opts.sos,
     })
     setBusy(false)
     if (out.kind === 'error') setError(out.message)
@@ -160,7 +161,7 @@ export default function ReportPage() {
   }
 
   function sosGo(f: File | null) {
-    send({ file: f, description: 'SOS emergency button pressed. No further details.', inProgress: true, anonymous: false, purok, landmark })
+    send({ file: f, description: 'SOS emergency button pressed. No further details.', inProgress: true, anonymous: false, purok, landmark, sos: true })
   }
 
   function reset() {

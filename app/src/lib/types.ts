@@ -32,7 +32,14 @@ export interface Incident {
   created_at: string
   acknowledged_at: string | null
   resolved_at: string | null
+  is_sos: boolean
+  reporter_type: ReporterType
+  outcome: Outcome | null
+  outcome_at: string | null
 }
+
+export type ReporterType = 'registered' | 'guest' | 'anonymous'
+export type Outcome = 'confirmed' | 'false_alarm' | 'unverified'
 
 export const CATEGORIES = [
   'fire', 'medical_emergency', 'natural_disaster', 'crime_serious',

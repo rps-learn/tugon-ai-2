@@ -27,6 +27,10 @@ A short note for your defense. Every choice below maps to a recognized usability
 | **Accessibility** | Visible focus ring, skip link, real labels on every field, `aria-live` for status messages, severity badges checked for contrast and always shown with text (P1 to P4), not just color. |
 | **Real 404 page** | Unknown links show a "Page not found" screen with a way back. |
 
+## Dark theme
+
+A sun / moon button in the header cycles **Auto** (follows the phone's setting), **Light** and **Dark**, and remembers the choice. All colors are tokens in `app/src/index.css`; the dark values are in the `[data-theme='dark']` block and the matching `prefers-color-scheme` block. Printing always uses black on white.
+
 ## Responsive behavior
 
 - **Phone (under 768px):** single column, bottom navigation within thumb reach, full-width buttons, map above the incident list.
@@ -35,7 +39,7 @@ A short note for your defense. Every choice below maps to a recognized usability
 
 ## Known limitations
 
-- No dark theme (light theme only).
+- The dark theme and the Cebuano and Tagalog responder screens were checked in the browser, not by a full audit. Have a native speaker review the translations before real use.
 - Contrast was checked by calculation, not with an assistive-technology audit. Run a Lighthouse or axe check before real-world use.
 - The map's zoom buttons and attribution come from the Leaflet library. The zoom buttons were enlarged to 44px, but the attribution text is small by design.
-- Responder screens are in English only.
+- Dates in the audit trail use the browser's own format, and the Privacy page is English only.

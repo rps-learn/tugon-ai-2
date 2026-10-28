@@ -25,6 +25,7 @@ tugon-ai-v2/
     schema.sql              Tables, security rules, functions
     seed.sql                Demo accounts and sample incidents
     functions/triage/       The AI Edge Function
+    functions/retention/    Deletes reports older than 12 months (runs daily)
   docs/                     This documentation
 ```
 
@@ -51,7 +52,7 @@ Open http://localhost:5173. The app talks to the Supabase project configured in 
 | Variable | Meaning |
 |---|---|
 | `GEMINI_API_KEY` | Your key from Google AI Studio |
-| `GEMINI_MODEL` | Defaults to `gemini-2.5-flash` |
+| `GEMINI_MODEL` | Defaults to `gemini-flash-latest` |
 
 Variables starting with `VITE_` are bundled into the public website. Never give a secret that prefix.
 
@@ -73,6 +74,11 @@ Until the secret is set, reports still work, but every report is sent to the Bar
 4. The citizen's screen polls for the result for up to about 60 seconds. If it never arrives, the report is still saved and a message says it is being processed.
 
 Until step 3 finishes, a report is visible only to the Barangay Official as "Unclassified". Agencies see it once it is routed.
+
+**SOS is different.** The SOS button sets `sos: true`. The function saves the report as **P1, visible to BFP, ERUF and Police at once**, before the AI runs. The AI then only fills in the category, address and note, so a slow or failed AI can never delay an SOS.
+
+### Rate limiting
+Each connection (a salted hash of its IP address, stored apart from the report) can send **20 reports per hour** and **6 SOS per hour**. Beyond that the function answers `429` and the app shows a plain message. The hashes are deleted after 2 days. To change the limits, set these Supabase secrets (no redeploy needed): `RATE_LIMIT_PER_HOUR`, `SOS_RATE_LIMIT_PER_HOUR`, and optionally `RATE_SALT` (any random text). **Many students on one Wi-Fi share one limit**, so raise `RATE_LIMIT_PER_HOUR` for a classroom demo.
 
 ### Choosing the Gemini model
 Google retires and renames Gemini models often, and some are closed to new accounts (for example `gemini-2.5-flash` returned a 404 "no longer available to new users" for this project). The function therefore uses these defaults:
@@ -99,8 +105,9 @@ The existing project is **tugon ai 2** (ref `amalxkwwytrlxbxekvxw`) and is alrea
    ```
    `--no-verify-jwt` is intentional so guests (no account) can submit reports. The function validates input itself.
 4. Add the `GEMINI_API_KEY` secret (section 4).
-5. **Authentication, Providers, Email:** turn off **Confirm email** if you want citizen sign-ups to work instantly. Guests can always report without an account.
-6. Copy the project URL and publishable key (Project Settings, API Keys) into `app/.env`.
+5. Deploy the retention function: `npx supabase functions deploy retention --no-verify-jwt --project-ref <project-ref>`. The last block of `schema.sql` schedules it daily at 03:00 Philippine time with `pg_cron` (replace `<project-ref>` in that block with your own).
+6. **Authentication, Providers, Email:** turn off **Confirm email** if you want citizen sign-ups to work instantly. Guests can always report without an account.
+7. Copy the project URL and publishable key (Project Settings, API Keys) into `app/.env`.
 
 ### Security design (why citizens cannot see each other's reports)
 
@@ -172,16 +179,19 @@ Valid roles: `citizen`, `official`, `bfp`, `eruf`, `police`.
 | Refreshing `/console` gives a 404 | Root Directory is not `app`, so `vercel.json` is not being used. |
 | No location | The browser blocked permission, or the site is not on HTTPS. The user can tap the map to place the pin. |
 | Console shows no incidents | Agencies only see **open** incidents routed to them. Tick **Show resolved**, or use the seeded open incidents. |
+| "Too many reports from this connection" | The rate limit (20 reports or 6 SOS per hour per connection). Wait, or raise `RATE_LIMIT_PER_HOUR` for a classroom demo. To clear it now, run `delete from public.report_log;` in the SQL Editor. |
 | Everything is slow or errors after days idle | The free Supabase project paused. Restore it in the dashboard. |
 | `npm run build` fails on `react-is` | Run `npm install react-is` in `app/`. |
 
 ## 11. Known limitations (student scope)
 
 - No SMS or push notifications. Agencies get a live in-app list with a sound alert while the console is open.
-- No broadcast advisories, PDF reports, trend alerts or predictions.
-- The report endpoint has no rate limiting.
-- Reports are not verified. Guest and anonymous reporters cannot be identified, and nothing records false alarms yet.
+- No broadcast advisories. PDF reports use the browser's Print / Save as PDF, not a generated file.
+- The rate limit is per connection. A shared Wi-Fi or phone network counts as one, and a determined spammer can change connection. It reduces spam; it does not stop it.
+- Reports are not verified. **Registered account** only means the reporter signed in; the barangay has not checked that they live there. Guest and anonymous reporters cannot be identified. Responders record the outcome (Confirmed, False alarm, Unable to verify), but the app never penalizes anyone automatically.
+- Trend alerts and the hotspot map are simple counts, not predictions or machine learning.
+- Cebuano and Tagalog responder screens have not been reviewed by a native speaker.
 - Readable addresses come from the free OpenStreetMap Nominatim service, looked up from the citizen's phone. It is fair-use only (about one request per second), so it suits a demo, not heavy traffic.
-- The privacy page says reports are kept for 12 months, but no scheduled job deletes them yet.
+- Retention: the daily job deletes reports and photos older than 12 months. Change it with the `RETENTION_MONTHS` secret.
 - Map tiles do not work offline (reports still queue offline).
 - The privacy policy is a template and should be reviewed by a data protection officer before real use.
