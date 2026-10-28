@@ -180,5 +180,8 @@ Valid roles: `citizen`, `official`, `bfp`, `eruf`, `police`.
 - No SMS or push notifications. Agencies get a live in-app list with a sound alert while the console is open.
 - No broadcast advisories, PDF reports, trend alerts or predictions.
 - The report endpoint has no rate limiting.
+- Reports are not verified. Guest and anonymous reporters cannot be identified, and nothing records false alarms yet.
+- Readable addresses come from the free OpenStreetMap Nominatim service, looked up from the citizen's phone. It is fair-use only (about one request per second), so it suits a demo, not heavy traffic.
+- The privacy page says reports are kept for 12 months, but no scheduled job deletes them yet.
 - Map tiles do not work offline (reports still queue offline).
 - The privacy policy is a template and should be reviewed by a data protection officer before real use.

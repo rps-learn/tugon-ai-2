@@ -32,7 +32,7 @@ You do not need an account to report.
 
 ### Send a quick report
 1. Open the app and allow **location** when asked. You can also tap the map to move the pin.
-2. Tap **Add photo** (camera) if you can do so safely.
+2. Add a photo if you can do so safely: tap **Take photo** to use the camera, or **Upload photo** to choose one from your gallery. Tap **Remove** to change it.
 3. Describe what happened in English, Bisaya or Tagalog. Optionally tap a type chip (Fire, Medical, Disaster, Crime, Disturbance, Other).
 4. Answer **Is it happening right now?** This is required, because it decides how urgent the report is.
 5. Optionally enter your Purok or Sitio and a **landmark** (for example "near the basketball court"). A readable address for your pin appears under the map so you can check it. Tick **Report anonymously** for sensitive issues such as domestic violence.
@@ -42,7 +42,7 @@ You do not need an account to report.
 Tap the big red **SOS** button. Choose **Take a photo** or **Send SOS now**. It sends your location marked as happening now. Add details by also sending a normal report if you can.
 
 ### No signal?
-The report is saved on your phone and sent automatically when you are back online. A yellow banner shows how many are waiting.
+The report is saved on your phone and sent automatically when you are back online. A yellow banner shows how many are waiting. A half-written report is also saved as you type, so you can close the app and return to it. Only the four most common incident types are shown at first; tap **More types** for the rest.
 
 ### Track your reports
 Open **My reports**. Each report shows its progress: Submitted, Classified, Agency notified, then Acknowledged / En route / On scene, then Resolved. The page refreshes every 15 seconds.

@@ -30,7 +30,7 @@ Having the Official and BFP windows side by side lets the audience see reports a
 ### Step 1: A citizen reports a fire (phone)
 
 1. Open the site and **Allow location** when asked.
-2. Tap **Add photo** and pick a fire photo.
+2. Tap **Upload photo** and pick a fire photo from your gallery (or **Take photo** to use the camera).
 3. In **What happened?** type (Cebuano):
    `Nagsiga ang kalayo sa ikaduhang andana sa balay sa among silingan, daghan og aso, naay bata nga naipit sa sulod.`
 4. Tap the **Fire** chip.
@@ -76,9 +76,9 @@ Run these from the phone as a guest. "Now?" is the happening-right-now toggle.
 | 5 | Road damage (use a pothole photo) | `Dako nga lungag sa dalan duol sa kapilya.` | No | social_general, P4, Barangay Official |
 | 6 | Flood | `Mitaas ang tubig-baha, naipit mi sa ikaduhang andana.` | Yes | natural_disaster, P1 or P2, BFP + ERUF |
 | 7 | Unclear report | `Naay problema diri palihug lang.` | Yes | **Low confidence** goes to the Official's **Review** tab |
-| 8 | SOS | Tap **SOS**, then **Send SOS now** | (automatic) | Low confidence, so it goes to review |
+| 8 | SOS | Tap **SOS**, then **Send SOS now** | (automatic) | Usually a medical emergency, **P1**, sent to **ERUF and Police** (not BFP). Check the ERUF or Police console. |
 
-### Show the "human in the loop" (cases 7 and 8)
+### Show the "human in the loop" (case 7)
 1. In the Official window open **Review (1)**.
 2. Read the AI's note and confidence (below 70%).
 3. Choose a category, severity and agency, then tap **Route and notify agency**.
@@ -98,6 +98,19 @@ Submit a report with **Report anonymously** ticked, for example: `Naay gihilabta
 
 ### Show the language switch
 Use the dropdown in the top bar to switch to **Cebuano** and **Tagalog**, then back to English. The citizen screens change language. Responder screens stay in English.
+
+### Test the AI with photos
+Use **Upload photo** with stock images (never real people). Try each one with text and again with the photo alone.
+
+| Photo | What to check |
+|---|---|
+| Clear house fire | fire, P1, BFP |
+| Flooded street | natural_disaster, BFP |
+| Car accident with people | medical_emergency or crime, ERUF |
+| Pothole or broken road | social_general, P4, Barangay Official |
+| Random photo (a cat, a meal) | **Low confidence**, goes to review |
+
+Also try a case where the text and the photo disagree (say "small candle" with a big fire photo). The AI trusts the photo for what physically happened and the text for context.
 
 ---
 
@@ -137,6 +150,9 @@ Response time, meaning the minutes from report to acknowledgement and to resolut
 **Does it cost anything?**
 No. Supabase, Gemini, Vercel and OpenStreetMap are all on free tiers.
 
+**How do you stop fake or false reports?**
+Honest answer: the app cannot prove a report is real. Real emergencies must not be blocked behind a login, so guest and anonymous reporting stay open. What it does today: the AI scores confidence, low-confidence reports go to a human, photos and GPS add evidence, and repeat reports of one incident are grouped. Planned next: responders mark each outcome as Confirmed, False alarm or Unable to verify; reports are labeled Verified resident, Guest or Anonymous so responders know how much to confirm first; rate limiting; and a graduated warning system for registered residents. Any penalty is the barangay's decision under its own ordinance and the Data Privacy Act, not something the app does automatically.
+
 **What are the limitations?**
 Be honest, because panels respect that.
 - No SMS or push notifications. The console alerts only while it is open.
@@ -171,3 +187,4 @@ delete from public.incidents where urgency_note like 'Demo open incident%';
 | No sound for alerts | Click once anywhere on the console page, then submit again. |
 | Demo logins not showing | `VITE_DEMO_MODE` is not `true` in Vercel. Set it and redeploy. |
 | Wi-Fi is bad | Show the offline queue on purpose, and keep a short screen recording of the full flow as a backup. |
+| "The responders did not receive my report" | Check which console you are in. Each report goes only to its routed agencies: an SOS goes to ERUF and Police, a fire to BFP, and so on. The Barangay Official sees everything. Unclear reports wait in the Official's **Review** tab. |
